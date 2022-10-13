@@ -1,0 +1,311 @@
+<!--
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<style>
+  /* general formatting and layout */
+
+  * {
+    font: message-box;
+    font-size: 1rem;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+  body {
+    background-color: #F9F9FA;
+    max-width: 1200px;
+    padding: 50px 30px;
+    margin: 0 auto;
+  }
+  body .header {
+    display: flex;
+    align-items: center;
+  }
+  body .header img {
+    object-fit: contain;
+  }
+  body .header h1 {
+    flex-grow: 1;
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+  body .header h1,
+  body .header span {
+    font-size: 2rem;
+  }
+  input[type=text],
+  input[type=number],
+  input[type=button],
+  input[type=color],
+  textarea,
+  select {
+    width: 100%;
+    padding: 4px 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  input[type=checkbox],
+  input[type=button],
+  input[type=color],
+  select {
+    cursor: pointer;
+  }
+  input:hover,
+  textarea:hover,
+  select:hover {
+    border: 1px solid #3399FF !important;
+  }
+  input[type=button]:disabled {
+    border: 1px solid #ccc !important;
+    cursor: auto !important;
+    opacity: 0.5;
+  }
+
+  /* sections */
+
+  .section {
+    margin-top: 25px;
+    margin-bottom: 50px;
+  }
+  .collapsed-section {
+    margin-bottom: 0px;
+  }
+  .section-name {
+    padding: 5px 0px 5px 6px;
+    font-size: 130%;
+    color: #222222;
+    border-bottom: 1px #c6e3ff solid;
+    border-left: 5px #c6e3ff solid;
+  }
+  .section-name {
+    cursor: pointer;
+  }
+
+  .section-settings {
+    border-left: 5px #c6e3ff solid;
+  }
+  .collapsed-section .section-settings {
+    display: none;
+  }
+  .section:hover > .section-name {
+    color: #3399FF;
+    border-bottom: 1px #3399FF solid;
+    border-left: 5px #3399FF solid;
+  }
+  .section:hover > .section-settings {
+    border-left: 5px #3399FF solid;
+  }
+
+  /* settings */
+
+  .setting {
+    display: flex;
+    border-bottom: 1px #ddd solid;
+    padding: 8px;
+  }
+  .setting:hover {
+    background-color: #fff;
+  }
+  .setting-name {
+    width: 40%;
+    max-width: 128px;
+    margin-right: 20px;
+  }
+  .setting-description {
+    font-size: 0.8rem;
+    width: 90%;
+    padding-left: 20px;
+    color: #000;
+  }
+
+  div.setting-description p {
+    margin: 0.3em -1.0em;
+  }
+
+  .setting-description * {
+    font-size: 0.8rem;
+  }
+  .setting-description a {
+    font-size: 0.8rem;
+    color: #666;
+  }
+  .setting-description em {
+          /* font-weight: bold !important; */
+          font-style: italic !important;
+  }
+  .setting-description details,
+  .setting-description summary {
+    font-size: 0.8rem;
+    color: #666;
+  }
+  .setting-description summary:hover {
+    color: #3399FF;
+    cursor: pointer;
+  }
+  .setting-reset {
+    visibility: hidden;
+    min-width: 65px;
+  }
+  .setting:hover .setting-reset {
+    visibility: visible;
+  }
+  .setting.disabled .setting-value {
+    font-size: 0.8rem;
+  }
+  .setting.disabled {
+    color: #666;
+  }
+  .setting.disabled:hover {
+    background-color: #0000;
+  }
+
+  .setting.indent .setting-name::before {
+    content: "\00a0\00a0\00a0\00a0"; 
+  }
+
+  .setting-description p {
+     margin: 0 0 0.5em;
+  }
+
+  .attributions {
+     margin: 3em 0;
+  }
+
+  .attributions h1 {
+     font-size: 1.3em;
+     margin: 1.5em 0 0;
+  }
+
+  .attributions p {
+     margin: 0.3em 0;
+  }
+
+
+</style>
+<title>About Click Copy Link</title>
+<link rel="shortcut icon" type="image/png" href="/icons/link48.png"/>
+</head>
+
+<body>
+  <div class="header">
+    <img src="/icons/link96.png" alt="">
+    <h1><span style="color: #3399FF">Click Copy Link </span><br/>
+	<span style="font-size: 0.5em">by tsaost<span></h1>
+  </div>
+
+<div>&nbsp</div>
+
+<div class="section">
+  <div class="section-name">Content</div>
+
+  <div class="section-settings">
+    <div class="setting">
+      <div class="setting-name">Overview</div>
+      	<div class="setting-description">
+      	 <ul>
+      	 <li>
+      	 Move the cursor over a link 
+      	 and use <em>Ctrl+C</em> to copy it to the clipboard
+      	 (but if there is already a selection then Ctrl+C will
+      	 copy the selection rather than the link.)
+      	 </li>
+      	 <li>Alternatively, hold the <em>shift key</em> and then use
+      	 <em>middle mouse click</em> on the link to copy it
+      	 (this works regardless of whether or not there is a selection.)
+      	 </li>
+      	 <li>
+      	 To copy multiple links, hold the
+      	 <em>shift key</em> and then use <em>left mouse click</em> on the
+      	 link to add it to the links already copied to the clipboard.
+      	 </li>
+      	 <li>
+      	 Alternatively, select the links, then click on the
+      	 <em>click copy link toolbar icon</em>
+      	 <img src="icons/link48.png" style="width: 16px; height: 16px"> to copy
+      	 them all into the clipboard. 
+      	 </li>
+      	 <li>
+      	 Last but not least, turn on the <em>Auto hover copy</em> option so that
+      	 when the cursor hover over a link longer the <em>Auto hover delay</em>
+      	 then it will be copied automatically to the clipboard.
+      	 </li>
+      	 </ul>
+      </div>
+    </div>  
+  </div>  
+
+  <div class="section-settings">
+    <div class="setting">
+      <div class="setting-name">Why?</div>
+      <div class="setting-description">
+      <p>
+      Normally, if you want to copy a link you just right click on the link
+      and then select "Copy Link" from the context menu.
+      That's easy enough, just two clicks, so why
+      obther with this extension?
+      </p>
+      <p>
+      The problem is that the context menu is rather long, and you have to scan
+      down the list until you find "Copy Link".  To make matters worse, the
+      context menu is dynamic so the ordering depends on what is being shown
+      on the page and other extensions running on the browser.
+      When you are working in a state
+      of "flow", the act of scanning the context menut to finding "Copy Link"
+      takes mental effort and that breaks your state of flow.
+      </p>
+      <p>
+      By replace this mentally taxing way of copying links with one that is
+      based on physical action (Ctrl+C or shift click) that can be offloaded
+      to your muscle memory, you can stay in your flow state and continue
+      doing whatever you are working on without losing concentration.
+      </p>
+      </div>
+    </div>
+
+    <div class="setting">
+      <div class="setting-name">Problems?</div>
+      <div class="setting-description">
+      <p>Please go to <a href="https://github.com/tsaost/copylink/issues">
+      https://github.com/tsaost/copylink/issues</a> to report any problems.</p>
+      </div>
+    </div>
+
+    <div class="setting">
+      <div class="setting-name">Advanced usage</div>
+      <div class="setting-description">
+        <details>
+          <summary>[Press to expand/collapse]</summary>
+	    The <em>Middle click close</em> feature actually has nothing to
+	    do with copying links, but it's there if you want to quick way to
+	    close a tab with just a single mouse click.
+        </details>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="attributions">
+<h1>Attributions</h1>
+<p>
+Icons are taken from <a href="https://ionic.io/ionicons">Ionicons</a>.
+</p>
+<p>
+Some code (settings.html and settings.js) from the 
+<a href="https://addons.mozilla.org/en-US/firefox/addon/swift-selection-search">
+Swift Selection Search</a> extension by CanisLupus (Daniel Lobo)
+aren used in options.js and options.html.
+</p>
+<p>
+The hover Ctrl+C idea and a bit of code is copied from the chrome extension <a
+href="https://chrome.google.com/webstore/detail/copy-link-address/kdejdkdjdoabfihpcjmgjebcpfbhepmh?hl=en">Copy
+Link Address</a> by Dhruv Vemula.
+</p>
+</div>
+
+</html>

@@ -1,0 +1,46 @@
+{
+    "manifest_version": 2,
+    "name": "Click Copy Link",
+    "version": "0.5.6",
+    "description": "Hover over a link and copy using Ctrl-C/Cmd-C, or click on it with middle mouse button while holding shift or control",
+
+    "browser_specific_settings": {
+      "gecko": { "id": "clickcopylink.tsaost@gmail.com" }
+    },
+
+    "content_scripts": [{
+         "matches": ["<all_urls>"],
+         "js": ["copylink.js"],
+         "css": ["copylink.css"]
+    }],
+
+    "icons": {
+	"48": "icons/link48.png",	
+	"96": "icons/link96.png",	
+        "128": "icons/link128.png",
+        "225": "icons/link225.png"
+    },
+
+    "browser_action": {
+	"default_icon": {
+ 	    "48": "icons/link48.png",	
+	    "96": "icons/link96.png",
+	    "128": "icons/link128.png",
+	    "225": "icons/link225.png"
+        },
+        "default_title": "Click Copy Link"
+    },
+
+    "permissions": [ "tabs", "storage", "contextMenus", "clipboardWrite"],
+
+    "options_ui": {
+	"page": "options.html",
+	"open_in_tab": true
+    },
+
+    "background": {
+       "scripts": ["background.js"],
+       "persistent": false
+    }
+
+}

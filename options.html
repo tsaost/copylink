@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<style>
+  /* general formatting and layout */
+
+  * {
+    font: message-box;
+    font-size: 1rem;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  body {
+    background-color: #F9F9FA;
+    max-width: 1200px;
+    padding: 50px 30px;
+    margin: 0 auto;
+  }
+
+  body .header {
+    display: flex;
+    align-items: center;
+  }
+  body .header img {
+    object-fit: contain;
+  }
+  body .header h1 {
+    flex-grow: 1;
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+  body .header h1,
+  body .header span {
+    font-size: 2rem;
+  }
+  input[type=text],
+  input[type=number],
+  input[type=button],
+  input[type=color],
+  textarea,
+  select {
+    width: 100%;
+    padding: 4px 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  input[type=checkbox],
+  input[type=button],
+  input[type=color],
+  select {
+    cursor: pointer;
+  }
+  input:hover,
+  textarea:hover,
+  select:hover {
+    border: 1px solid #3399FF !important;
+  }
+  input[type=button]:disabled {
+    border: 1px solid #ccc !important;
+    cursor: auto !important;
+    opacity: 0.5;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  /* sections */
+
+  .section {
+    margin-top: 25px;
+    margin-bottom: 50px;
+  }
+  .collapsed-section {
+    margin-bottom: 0px;
+  }
+  .section-name {
+    padding: 5px 0px 5px 6px;
+    font-size: 130%;
+    color: #222222;
+    border-bottom: 1px #c6e3ff solid;
+    border-left: 5px #c6e3ff solid;
+  }
+
+  .section-name {
+    cursor: pointer;
+  }
+
+  .section-name::before {
+    content: "\00a0▽\00a0\00a0";
+    font-size: 85%;
+  }
+  .collapsed-section .section-name::before {
+    content: "\00a0▷\00a0\00a0";
+  }
+
+  .section-settings {
+    border-left: 5px #c6e3ff solid;
+  }
+  .collapsed-section .section-settings {
+    display: none;
+  }
+  .section:hover > .section-name {
+    color: #3399FF;
+    border-bottom: 1px #3399FF solid;
+    border-left: 5px #3399FF solid;
+  }
+  .section:hover > .section-settings {
+    border-left: 5px #3399FF solid;
+  }
+
+  /* settings */
+
+  .setting {
+    display: flex;
+    border-bottom: 1px #ddd solid;
+    padding: 8px;
+  }
+  .setting:hover {
+    background-color: #fff;
+  }
+  .setting-name {
+    width: 40%;
+    max-width: 300px;
+    margin-right: 20px;
+  }
+  .setting-value {
+    width: 35%;
+    max-width: 250px;
+    margin-top: 2px;
+  }
+  .setting-description {
+    font-size: 0.8rem;
+    width: 80%;
+    padding-left: 20px;
+    color: #666;
+  }
+  .setting-description * {
+    font-size: 0.8rem;
+  }
+  .setting-description a {
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  .setting-description p {
+     margin: 0.5em 0;
+   }
+
+  .setting-description em {
+	  /* font-weight: bold !important; */
+	  font-style: italic !important;
+  }
+  .setting-description details,
+  .setting-description summary {
+    font-size: 0.8rem;
+    color: #666;
+  }
+  .setting-description summary:hover {
+    color: #3399FF;
+    cursor: pointer;
+  }
+  .setting-reset {
+    visibility: hidden;
+    min-width: 65px;
+  }
+  .setting:hover .setting-reset {
+    visibility: visible;
+  }
+  .setting.disabled .setting-value {
+    font-size: 0.8rem;
+  }
+  .setting.disabled {
+    color: #666;
+  }
+  .setting.disabled:hover {
+    background-color: #0000;
+  }
+
+  .setting.indent .setting-name::before {
+    content: "\00a0\00a0\00a0\00a0"; 
+  }
+
+  /* search engines "table" */
+
+  #engines-table {
+    width: 100%;
+    padding-bottom: 20px;
+  }
+  #engines-table * {
+    font-size: 0.8rem;
+  }
+  .engine-table-row {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+  }
+  .engine-itself {
+    width: 100%;
+    display: flex;
+  }
+  .engine-options {
+    margin-left: 103px;	 /* 24 + 24 + 24 + 24 + 4 (dragger + icon + 4px margin-right) + 3 (just padding) */
+    margin-top: 3px;
+    margin-bottom: 4px;
+    display: none;
+  }
+  .engine-table-row:not(.static-row):hover {
+    background: #c6e3ff88;
+  }
+  .engine-itself > div,
+  .engine-options > div {
+    margin: 1px;
+  }
+  .engine-dragger {
+    cursor: move;
+  }
+  .engine-dragger,
+  .engine-is-enabled,
+  .engine-is-enabled-in-context-menu,
+  .engine-icon-img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+  }
+  .engine-shortcut {
+    width: 30px;
+  }
+  .engine-shortcut input {
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .engine-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+  }
+  .engine-icon-img {
+    margin-right: 5px !important;
+  }
+  .engine-icon-img img {
+    padding: 0;
+    width: 22px;
+  }
+  .engine-name {
+    width: 15%;
+  }
+  .engine-search-link,
+  .engine-description-small {
+    width: 50%;
+  }
+  .engine-icon-link {
+    width: 35%;
+  }
+  .engine-uneditable {
+    padding: 4px 4px;
+    border: 1px solid #e5e5e5;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+  }
+  .engine-uneditable-name {
+    width: 14.8%;  /* small width adjustment to look better in relation with editable elements with 15% */
+    overflow-x: hidden;	 /* fixes cell staying too wide on a narrow window */
+  }
+  .engine-uneditable-description {
+    width: 85%;
+  }
+  .engine-add-button {
+    max-width: 150px;
+    min-width: 0px;
+    width: 30%;
+  }
+
+  /* group popup */
+
+  #group-popup-container {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 90vw;
+    height: 90vh;
+    max-width: 500px;
+    max-height: 650px;
+    background-color: #F9F9FA;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-height: 150px;	/* avoids visual glitches when window is REALLY short */
+  }
+  #group-background-div {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    background-color: black;
+    opacity: 0.8;
+    width: 100vw;
+    height: 100vh;
+  }
+  #group-popup-header {
+    display: flex;
+    padding: 0.6rem;
+  }
+  #group-icon-img,
+  #group-icon-canvas {
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 24px;
+    height: 24px;
+  }
+  #group-icon-img:hover,
+  #group-icon-canvas:hover {
+    transform: scale(1.2, 1.2);
+  }
+  #group-popup-header > input {
+    margin-left: 0.3rem;
+  }
+  #group-popup-header > label {
+    display: flex;
+    align-items: center;
+    padding: 0.2rem;
+  }
+  #group-title-field {
+    overflow-x: auto;  /* avoids visual glitches when window is REALLY narrow */
+  }
+  #group-popup-content {
+    overflow-y: scroll;
+  }
+  #group-selected-engines-container {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  #group-selected-engines-container > div {
+    cursor: default;
+  }
+  #group-selected-engines-container .group-engines-list-row:hover .group-remove-engine-button {
+    visibility: visible;
+  }
+  #group-selected-engines-container:empty {
+    text-align: center; /* can't format this inside ::before */
+  }
+  #group-selected-engines-container:empty::before {
+    content: "Choose the engines that will belong to this group:";
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    font-style: italic;
+    text-align: center;
+  }
+  .group-remove-engine-button {
+    margin-left: auto !important;
+    margin-right: 1rem !important;
+    visibility: hidden;
+  }
+  .group-engines-list-row {
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+    padding-left: 0.5rem;
+    user-select: none;	  /* only added in Firefox 69 */
+    -moz-user-select: none;  /* support for older versions */
+    align-items: center;
+  }
+  .group-engines-list-row:hover {
+    background: #c6e3ff88;
+  }
+  .group-engines-list-row > * {
+    margin: 0.2rem;
+  }
+  .group-engines-list-row .engine-dragger {
+    text-align: center;
+    min-width: 30px;
+  }
+  .group-engines-list-row .engine-icon-img {
+    text-align: center;
+    min-width: 30px;
+  }
+  .group-engines-list-row .engine-icon-img > img {
+    width: 22px;
+    height: 22px;
+  }
+  #group-popup-footer {
+    display: flex;
+    border-radius: 4px;
+    width: 100%;
+    padding: 0.6rem;
+    margin-top: auto;  /* pushes footer to the bottom */
+  }
+  #group-popup-footer > * {
+    margin: 0.2rem;
+  }
+  .group-engine-description {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+
+  /* platform/version specific elements */
+
+  .os-windows, .os-mac, .os-linux {
+    display: none;
+  }
+
+  /* specifics */
+
+  #section_instructions li,
+  #section_instructions summary {
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+
+  #section_instructions ul li ul {
+    padding-left: 20px;
+  }
+
+  /* emphasizes text */
+  pop,
+  popm {
+    background: #eee;
+    white-space: nowrap;
+  }
+
+  /* emphasizes text, but monospaced */
+  popm {
+    font-family: "Courier New", Courier, mono;
+  }
+
+  /********************/
+  /* DARK MODE COLORS */
+  /********************/
+
+  input[name="toggleDarkMode"] {
+    max-width: 50px;
+  }
+
+  body.dark {
+    color: #eee;
+    background-color: #181A1B;
+  }
+  body.dark input[type=text],
+  body.dark input[type=number],
+  body.dark input[type=button],
+  body.dark input[type=color],
+  body.dark textarea,
+  body.dark select {
+    border: 1px solid #45454b;
+    color: #eee;
+    background-color: #2a2a31;
+  }
+  body.dark input[type=button] {
+    border: 1px solid #7f93a6;
+    background-color: #45454b;	/* make them different from other inputs */
+  }
+  body.dark optgroup {
+    background-color: #161618;
+  }
+
+  body.dark .section-name {
+    color: #ddd;
+  }
+
+  body.dark .setting {
+    border-bottom: 1px #45454b solid;
+  }
+  body.dark .setting:hover {
+    background-color: #0e0e0f;
+  }
+
+  body.dark .setting-description,
+  body.dark .setting-description * {
+    color: #ddd;
+  }
+
+  body.dark .engine-uneditable {
+    border: 1px solid #45454b;
+    background-color: #45454b;
+  }
+  body.dark .engine-table-row:not(.static-row):hover {
+    background: #3c3c42;
+  }
+
+  body.dark pop,
+  body.dark popm {
+    background: #2a2a31;
+  }
+
+  body.dark #group-popup-container {
+    background-color: #181A1B;
+  }
+  body.dark .group-engines-list-row:hover {
+    background: #3c3c42;
+  }
+</style>
+<title>Click Copy Link Options</title>
+<link rel="shortcut icon" type="image/png" href="/icons/link48.png"/>
+</head>
+
+<body>
+<div id="settings">
+  <div class="header">
+    <img src="/icons/link96.png" alt="">
+    <h1><span style="color: #3399FF">Click Copy Link</span><br/>
+	<span style="font-size: 0.5em">by tsaost<span></h1>
+  </div>
+
+  <div class="section" id="section_options">
+    <div class="section-name">Options</div>
+
+    <div class="section-settings">
+
+      <div class="setting">
+    	<div class="setting-name" style="max-width: 3rem;">Overview</div>
+  	<div class="setting-description">
+    	  <ul>
+    	  <li>
+    	  Move the cursor over a link 
+    	  and use <em>Ctrl+C</em> to copy it to the clipboard
+    	  (but if there is already a selection then Ctrl+C will
+    	  copy the selection rather than the link.)
+    	  </li>
+    	  <li>Alternatively, hold the <em>shift key</em> and then use
+    	  <em>middle mouse click</em> on the link to copy it
+    	  (this works regardless of whether or not there is a selection.)
+    	  </li>
+    	  <li>
+    	  To copy multiple links, hold the
+    	  <em>shift key</em> and then use <em>left mouse click</em> on the
+    	  link to add it to the links already copied to the clipboard.
+    	  </li>
+    	  <li>
+    	  Alternatively, select the links, then click on the
+    	  <em>click copy link toolbar icon</em>
+    	  <img src="icons/link48.png" style="width: 16px; height: 16px"> to copy
+    	  them all into the clipboard. 
+    	  </li>
+    	  <li>
+    	  Last but not least, turn on the <em>Auto hover copy</em> option so that
+    	  when the cursor hover over a link longer the <em>Auto hover delay</em>
+    	  then it will be copied automatically to the clipboard.
+    	  </li>
+    	  </ul>
+    	</div>
+      </div>
+
+      <div class="setting">
+	<div class="setting-name">Shift + left click</div>
+	<div class="setting-value">
+	  <input class="setting-input" type="checkbox" name="shiftLeftClick" autocomplete="off">
+	</div>
+	<div class="setting-description">When left clicking on a link while
+	holding the shift key the link will be concatenated to the last link.
+	Normally shift + left click will open the link in a new window,
+	and shift + ctrl + left click will open the link in a new foreground
+	tab. Disable this option if you want the normal/default behavoir.
+	</div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+      <div class="setting">
+	<div class="setting-name">Shift + middle click</div>
+	<div class="setting-value">
+	  <input class="setting-input" type="checkbox" name="shiftMiddleClick" autocomplete="off">
+	</div>
+	<div class="setting-description">When middle clicking on a link while
+	holding the shift key the link will be copied to the clipboard.
+	Normally shift + middle click will open the link in a new foreground
+	tab. Disable this option if you want the normal/default behavoir.
+</div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+      <div class="setting">
+	<div class="setting-name">Clipboard copy tooltip</div>
+	<div class="setting-value">
+	  <input class="setting-input" type="checkbox" name="clipboardCopyTooltip" autocomplete="off">
+	</div>
+	<div class="setting-description">Show a tooltip of the link copied to
+	the clipboard.
+	</div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+      <div class="setting indent hidden">
+	<div class="setting-name">Maximum tooltip</div>
+	<div class="setting-value">
+	  <input class="setting-input" type="number" name="maxTooltip" min="0">
+	</div>
+	<div class="setting-description">Maximum number of characters
+	displayed in <em>Clipboard copy tooltip</em>
+	</div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+
+      <div class="setting">
+	<div class="setting-name">Auto hover copy</div>
+	<div class="setting-value">
+	  <select class="setting-input" name="autoHoverCopy">
+	    <option value="never">Never (Off)</option>
+	    <option value="always">Always (On)</option>
+	    <option value="shift">Shift Key (On)</option>
+	    <option value="control">Control Key (On)</option>
+	    <option value="alt">Alt Key (Option on Mac)</option>
+	    <!-- option value="meta">Windows Key (Command on Mac)</option -->
+	  </select>
+	</div>
+	<div class="setting-description">
+	<p>Hover over a link, wait a bit
+	(long enough to see a tooltip showing the link is being copied) and the
+	URL of the link will be copied automatically to the clipboard.
+	You can set it so that <em>Auto hover copy</em> happens only
+	when you hold down the shift/control/alt key.
+	</p>
+	<p>
+	But note that shift/control/alt key detection does not work
+	100% of the time, and is broken if you have Firefox's
+	<em>privacy.resistFingerprinting</em> set to true in
+	<em>about:config</em>
+	</p>
+</div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+      <div class="setting indent hidden">
+	<div class="setting-name">Auto Hover delay</div>
+	<div class="setting-value">
+	  <input class="setting-input" type="number" name="autoHoverDelay" min="0">
+	</div>
+	<div class="setting-description">Number of
+	milliseconds to delay auto hover copy.	If after the delay
+	the mouse has not moved, then the auto copy is carried out</div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section collapsed-section" id="section_options">
+    <div class="section-name">Advanced</div>
+    <div class="section-settings">
+      <div class="setting">
+	<div class="setting-name">Middle click close</div>
+	<div class="setting-value">
+	  <select class="setting-input" name="middleClickClose">
+	    <option value="never">Never (Off)</option>
+	    <option value="always">Always (On)</option>
+	    <option value="shift">Shift Key (On)</option>
+	    <option value="control">Control Key (On)</option>
+	    <option value="alt">Alt Key (Option on Mac)</option>
+	    <!-- option value="meta">Windows Key (Command on Mac)</option -->
+	  </select>
+	</div>
+	<div class="setting-description">
+	  <p>
+	  This feature actually has nothing to do with copying links.
+	  But if you want to have a quick way to close a page
+	  then you can try it.	
+	  </p>
+	  <p>
+	  Clicking on an area on the page that is <em>NOT</em> a link with
+	  the middle mouse button will cause the page to be closed.
+	  You can set it so that <em>Auto hover copy</em> happens only
+	  when you hold down the shift/control/alt key.
+	  </p>
+	</div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+<script src="options.js"></script>
+</body>
+
+</html>
