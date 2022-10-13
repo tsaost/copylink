@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Click Copy Link",
-    "version": "0.5.6",
+    "version": "1.0.0",
     "description": "Hover over a link and copy using Ctrl-C/Cmd-C, or click on it with middle mouse button while holding shift or control",
 
     "browser_specific_settings": {
