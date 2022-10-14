@@ -5,9 +5,13 @@ const DEBUG = true;
 const printDebug = DEBUG? text => console.debug("copylink b: "+text) : _ => {};
 
 function getErrorHandler(text) {
-	return DEBUG? error => { printDebug(text + ' ' + error); } : undefined;
+	return DEBUG? error => {
+		const errorText = text + ' ' + error;
+		console.trace();
+		console.debug(errorText);
+		console.log(errorText);
+	} : undefined;
 }
-
 
 (function(browser) {
     let promises = true; // Assume running on Firefox
@@ -224,6 +228,9 @@ function getErrorHandler(text) {
 			}
 		});
 	}
+
+	console.log("COPYLINK b DEBUG:" + DEBUG);
+	console.debug("COPYLINK b DEBUG:" + DEBUG);
 })(typeof browser === "undefined"? chrome : browser);
 // Must check using (typeof browser === "undefined") rather than
 // use something like (browser || chrome)
