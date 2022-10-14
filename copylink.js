@@ -130,6 +130,7 @@ function getErrorHandler(text) {
 	
 	function copyTextToClipboard(text, x, y) {
 		printDebug("copyTextToClipboard(" + x + ", " + y + "): " + text);
+
 		if (window.location.href.startsWith('http://')) {
 			// https://developer.mozilla.org/en-US/docs/Mozilla/
 			// Add-ons/WebExtensions/Interact_with_the_clipboard
@@ -143,7 +144,7 @@ function getErrorHandler(text) {
 			if (!copyLinkDiv) {
 				createCopyLinkDiv();
 			}
-			copyLinkDiv.innerHTML = text.replace('\n', '<br/>');
+			copyLinkDiv.innerHTML = text.replaceAll('\n', '<br/>');
 			window.getSelection().removeAllRanges();
 			selectCopyLinkDivText(copyLinkDiv);
 			document.execCommand('copy');
@@ -156,13 +157,21 @@ function getErrorHandler(text) {
 							 getErrorHandler("Error clipboard.writeText"));
 			}
 		}
-		// printDebug("show tooltip(" + x + ", " + y + ")");
+
+		if (autoHoveCopyTimeout) {
+			printDebug("0 clearTimeout(autoHoveCopyTimeout)");
+			clearTimeout(autoHoveCopyTimeout);
+			autoHoveCopyTimeout = null;
+		}
+
+		printDebug("show tooltip(" + x + ", " + y + ")");
 		if (settings.clipboardCopyTooltip && (x > 0 || y > 0)) {
 			if (!tooltipDiv) {
+				printDebug("createTooltip()");
 				createTooltip();
 			}
 			let tooltipText = text;
-			const lastIndex = tooltipText.indexOf('\n');
+			const lastIndex = tooltipText.lastIndexOf('\n');
 			if (lastIndex > 0) {
 				tooltipText = tooltipText.substring(lastIndex + 1);
 			}
@@ -171,17 +180,12 @@ function getErrorHandler(text) {
 				tooltipText = tooltipText.
 					substring(textLength - settings.maxTooltip);
 			}
+			printDebug(x + "," + y + " tooltipText:" + tooltipText);
 			tooltipTextHolder.innerText = tooltipText;
 			const style = tooltipDiv.style;
             style.left = x + 'px';
             style.top = (y + 10) + 'px';
 			tooltipTextHolder.style.display = 'block';
-		}
-
-		if (autoHoveCopyTimeout) {
-			printDebug("0 clearTimeout(autoHoveCopyTimeout)");
-			clearTimeout(autoHoveCopyTimeout);
-			autoHoveCopyTimeout = null;
 		}
 	}
 
@@ -309,8 +313,8 @@ function getErrorHandler(text) {
 			shiftKeyHold = event.shiftKey;
 			ctrlKeyHold = event.ctrlKey;
 			altKeyHold = event.altKey;
-			printDebug("keys shift:" + shiftKeyHold +
-					   " ctrl:" + ctrlKeyHold + " alt:" + altKeyHold);
+			// printDebug("keys shift:" + shiftKeyHold +
+			//		   " ctrl:" + ctrlKeyHold + " alt:" + altKeyHold);
 		}
 
 		let globalLeftMouseDown;
