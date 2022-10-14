@@ -128,7 +128,7 @@ function getErrorHandler(text) {
 	});
 	
 	
-	function copyTextToClipboard(text, tooltipText, x, y) {
+	function copyTextToClipboard(text, x, y) {
 		printDebug("copyTextToClipboard(" + x + ", " + y + "): " + text);
 		if (window.location.href.startsWith('http://')) {
 			// https://developer.mozilla.org/en-US/docs/Mozilla/
@@ -161,6 +161,11 @@ function getErrorHandler(text) {
 			if (!tooltipDiv) {
 				createTooltip();
 			}
+			let tooltipText = text;
+			const lastIndex = tooltipText.indexOf('\n');
+			if (lastIndex > 0) {
+				tooltipText = tooltipText.substring(lastIndex + 1);
+			}
 			const textLength = tooltipText.length;
 			if (textLength > settings.maxTooltip) {
 				tooltipText = tooltipText.
@@ -172,11 +177,39 @@ function getErrorHandler(text) {
             style.top = (y + 10) + 'px';
 			tooltipTextHolder.style.display = 'block';
 		}
+
 		if (autoHoveCopyTimeout) {
+			printDebug("0 clearTimeout(autoHoveCopyTimeout)");
 			clearTimeout(autoHoveCopyTimeout);
 			autoHoveCopyTimeout = null;
 		}
 	}
+
+	// bug bug bug
+	// For whatever reason, shiftKey, ctrlKey and altkey
+	// can be wrong when checked inside mouseover?
+	//
+	// So need to trap keydown and keyup to keep track
+	// of them here manually.
+	//
+	// Actually, this seems to be due to the fact that I have
+	// defaultPref("privacy.resistFingerprinting", true);
+	// (in fact, with resistFingerprinting true there is no
+	//  keyup/keydown for shift/ctrl/alt keys!)
+	//
+	// Well, even with privacy.resistFingerprinting false,
+	// event.shiftKey can still be false inside mouseover
+	// even while the shift key is being held.
+	//
+	// So continue to do manual tracking, which seems to work better
+	let shiftKeyHold = false;
+	let ctrlKeyHold = false;
+	let altKeyHold = false;
+	// developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/metaKey
+	// Warning: At least as of Firefox 48, the Windows key is no longer
+	// considered the "Meta" key. KeyboardEvent.metaKey is false when
+	// the Windows key is pressed.
+	// let metaKeyHold = false
 
 	let globalLinksText = '';
 
@@ -185,9 +218,9 @@ function getErrorHandler(text) {
 		// With modern browsers only button 0 will get here, but check it anyway
 		if (event.button === 0) {
 			const anchor = event.target.closest('a'); // getParentAnchor(target)
-			// printDebug("shiftKey(" + event.shiftKey +
+			// printDebug("shiftKey(" + shiftKeyHold +
 			//  	      ") shiftLeftClick:" + settings.shiftLeftClick);
-			if (anchor && event.shiftKey && settings.shiftLeftClick) {
+			if (anchor && shiftKeyHold && settings.shiftLeftClick) {
 				// Shift  Open link in new window    <- hijack shift because
 				// Ctrl   Open link in new tab		    most people seldom open
 				// Alt	  Download link					link in new window
@@ -195,8 +228,7 @@ function getErrorHandler(text) {
 				event.stopPropagation();
 				globalLinksText += '\n' + anchor.href;
 				// navigator.clipboard.writeText(globalLinksText);
-				copyTextToClipboard(globalLinksText, anchor.href,
-									event.pageX, event.pageY);
+				copyTextToClipboard(globalLinksText, event.pageX, event.pageY);
 			}
 		} else {
 			handleMouseAuxClick(event);
@@ -211,22 +243,22 @@ function getErrorHandler(text) {
 			if (anchor) {
 				// by default, shift/ctrl/alt + middle click all just open link
 				// in new tab, so only highjack shift
-				printDebug("shiftKey(" + event.shiftKey +
+				printDebug("shiftKey(" + shiftKeyHold +
 						   ") shiftMiddleClick:" + settings.shiftMiddleClick);
-				if (event.shiftKey && settings.shiftMiddleClick) {
+				if (shiftKeyHold && settings.shiftMiddleClick) {
 					event.preventDefault();
 					event.stopPropagation();
 					globalLinksText = anchor.href; // copy current link only
 					// navigator.clipboard.writeText(globalLinksText);
-					copyTextToClipboard(globalLinksText, globalLinksText,
+					copyTextToClipboard(globalLinksText, 
 										event.pageX, event.pageY);
 				}
 			} else {
 				const close = settings.middleClickClose;
 				if (close === 'always' ||
-					(close === 'shift' && event.shiftKey) ||
-					(close === 'control' && event.ctrlKey) ||
-					(close === 'alt' && event.altKey)) {
+					(close === 'shift' && shiftKeyHold) ||
+					(close === 'control' && ctrlKeyHold) ||
+					(close === 'alt' && altKeyHold)) {
 					printDebug("runtime.sendMessage(close)");
 					browser.runtime.sendMessage({type: 'close'}, reply =>
 												console.info(reply.farewell));
@@ -273,32 +305,6 @@ function getErrorHandler(text) {
 		// mouse is over the element
 		log("setup()");
 
-		// bug bug bug
-		// For whatever reason, shiftKey, ctrlKey and altkey
-		// can be wrong when checked inside mouseover?
-		//
-		// So need to trap keydown and keyup to keep track
-		// of them here manually.
-		//
-		// Actually, this seems to be due to the fact that I have
-		// defaultPref("privacy.resistFingerprinting", true);
-		// (in fact, with resistFingerprinting true there is no
-		//  keyup/keydown for shift/ctrl/alt keys!)
-		//
-		// Well, even with privacy.resistFingerprinting false,
-		// event.shiftKey can still be false inside mouseover
-		// even while the shift key is being held.
-		//
-		// So continue to do manual tracking, which seems to work better
-		let shiftKeyHold = false;
-		let ctrlKeyHold = false;
-		let altKeyHold = false;
-		// developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/metaKey
-		// Warning: At least as of Firefox 48, the Windows key is no longer
-		// considered the "Meta" key. KeyboardEvent.metaKey is false when
-		// the Windows key is pressed.
-		// let metaKeyHold = false
-
 		function keyUpDownHandler(event) {
 			shiftKeyHold = event.shiftKey;
 			ctrlKeyHold = event.ctrlKey;
@@ -309,8 +315,9 @@ function getErrorHandler(text) {
 
 		let globalLeftMouseDown;
 
-		window.addEventListener('mouseup', event => 
-								globalLeftMouseDown = false, true);
+		window.addEventListener('mouseup', event => {
+			globalLeftMouseDown = false
+		}, true);
 
 		window.addEventListener('mousedown', event => {
 			switch (event.button) {
@@ -348,7 +355,7 @@ function getErrorHandler(text) {
 				if (Math.abs(savedPageX - event.pageX) > 10 ||
 					Math.abs(savedPageY - event.pageY) > 10) {
 					// Too much movement, cancel the timer
-					printDebug("clearTimeout(autoHoveCopyTimeout)");
+					printDebug("1 clearTimeout(autoHoveCopyTimeout)");
 					clearTimeout(autoHoveCopyTimeout);
 					autoHoveCopyTimeout = null;
 					// savedPageX = savedPageY = 0;
@@ -391,7 +398,7 @@ function getErrorHandler(text) {
 					printDebug("setTimeout(" + anchor.href + ")");
 					autoHoveCopyTimeout =  setTimeout(_ => {
 						autoHoveCopyTimeout = null;
-						copyTextToClipboard(anchor.href, anchor.href,
+						copyTextToClipboard(anchor.href,
 											savedPageX, savedPageY);
 					}, settings.autoHoverDelay);
 				} 
@@ -476,15 +483,17 @@ function getErrorHandler(text) {
 				const value = items[key];
 				printDebug("update settings[" + key + "] to " + value);
 				settings[key] = value;
-				if (key == 'autoHoverCopy') {
-					if (value === 'always' || value === 'never') {
-						window.removeEventListener('keyup', keyUpDownHandler);
-						window.removeEventListener('keydown', keyUpDownHandler);
-					} else {
-						window.addEventListener('keyup', keyUpDownHandler);
-						window.addEventListener('keydown', keyUpDownHandler);
-					}
-				} 
+//				if (key === 'autoHoverCopy') {
+//					if (value === 'always' || value === 'never') {
+//						window.removeEventListener('keyup', keyUpDownHandler);
+//						window.removeEventListener('keydown', keyUpDownHandler);
+//					} else {
+//						window.addEventListener('keyup', keyUpDownHandler);
+//						window.addEventListener('keydown', keyUpDownHandler);
+//					}
+//				} 
+				window.addEventListener('keyup', keyUpDownHandler);
+				window.addEventListener('keydown', keyUpDownHandler);
 			}
 		}
 
