@@ -22,13 +22,14 @@ saving the caret position.
 When you move away from the link, the caret position is restored.
 */
 
-const DEBUG = true;
+const DEBUG = false;
 
 const log = DEBUG? text => console.log("copylink c: "+ text) : _ => {};
 const printDebug = DEBUG? text => console.debug("copylink c: "+ text) : _ => {};
 
 function getErrorHandler(text) {
-	return DEBUG? error => alert(text + ' ' + error) : undefined;
+	return DEBUG? error => { printDebug(text + ' ' + error); console.trace(); }:
+		undefined;
 }
 
 (function(browser) {
@@ -242,7 +243,7 @@ function getErrorHandler(text) {
 
 	
 	function createCopyLinkDiv() {
-		console.trace();
+		// console.trace();
 		// const copyLinkDiv = document.createElement('span');
 		copyLinkDiv = document.createElement('div');
 		// copyLinkDiv.id = COPYLINKDIVID;
@@ -532,6 +533,8 @@ function getErrorHandler(text) {
 		window.addEventListener('load', setup);
 	}
 
+	console.log("COPYLINK c DEBUG:" + DEBUG);
+	console.debug("COPYLINK c DEBUG:" + DEBUG);
 })(typeof browser === "undefined"? chrome : browser);
 // Must check using (typeof browser === "undefined") rather than
 // use something like (browser || chrome)
