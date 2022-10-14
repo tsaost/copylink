@@ -180,7 +180,7 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 				}
 				break;
 
-//			case 'autoHoverCopy': {
+			case 'autoHoverCopy': 
 //				if (value !== 'never' && value != 'always') {
 //					alert("Auto hover copy may not always gets triggered " +
 //						  "because shift/ctrl/alt key detection can be " +
@@ -188,22 +188,33 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 //						  'use the "Always (On)" option.');
 //				}
 //			} break;
+				alertAutoHoverCopyShiftLeftClickConflict() ;
+				break;
 
-//			    if (value === 'shift' && settings.shiftLeftClick) {
-//				    alert("Using shift as Auto hover copy modifier may not " +
-//					  "work properly with the Shift+Left click turned on");
-//			    }
+			case 'shiftLeftClick':
+				alertAutoHoverCopyShiftLeftClickConflict() ;
+				break;
+			}
+		}
 
-//		case 'shiftLeftClick':
-//			printDebug("shiftLeftClick:" + value + " autoHoverCopy:" +
-//					   settings.autoHoverCopy);
-//			if (value && settings.autoHoverCopy === 'shift') {
-//				alert("Shift+Left click may not work properly when " +
-//					  "shift is also used as the Auto hover copy modifier");
-//			} break;
+		function alertAutoHoverCopyShiftLeftClickConflict() {
+			const autoHoverCopy = settings.autoHoverCopy;
+			if (settings.shiftLeftClick) {
+				const warning = "\n\n" +
+					"Basically, auto hover copy may overwrite the " +
+					"clipboard and replace whatever you just copied " +
+					"there using shift + left click.";
+				if (autoHoverCopy === 'shift') {
+					alert("Using shift as Auto hover copy modifier may not " +
+						  "work properly with Shift+Left click." + warning);
+				} else if (autoHoverCopy === 'always') {
+					alert("Auto hover copy Always (On) may not work propely " +
+						  "with Shift+Left click." + warning);
+				}
 			}
 		}
 	}
+
 
     document.addEventListener("DOMContentLoaded", _ => {
 		printDebug("DOMContentLoaded: " + defaultSettings);
