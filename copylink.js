@@ -22,14 +22,18 @@ saving the caret position.
 When you move away from the link, the caret position is restored.
 */
 
-const DEBUG = false;
+const DEBUG = true;
 
 const log = DEBUG? text => console.log("copylink c: "+ text) : _ => {};
 const printDebug = DEBUG? text => console.debug("copylink c: "+ text) : _ => {};
 
 function getErrorHandler(text) {
-	return DEBUG? error => { printDebug(text + ' ' + error); console.trace(); }:
-		undefined;
+	return DEBUG? error => {
+		const errorText = text + ' ' + error;
+		console.trace();
+		console.debug(errorText);
+		console.log(errorText);
+	} : undefined;
 }
 
 (function(browser) {
