@@ -2,10 +2,10 @@
     "manifest_version": 2,
     "name": "Click Copy Link",
     "version": "1.0.0",
-    "description": "Hover over a link and copy using Ctrl-C/Cmd-C, or click on it with middle mouse button while holding shift or control",
+    "description": "Hover over a link and copy using Ctrl-C/Cmd-C, or click on it with middle mouse button while holding the shift key.  You can also copy multiple links using shfit + left mouse click.",
 
     "browser_specific_settings": {
-      "gecko": { "id": "clickcopylink.tsaost@gmail.com" }
+      "gecko": { "id": "clickcopylink.t_s_a_o_s_t@gmail.com" }
     },
 
     "content_scripts": [{
