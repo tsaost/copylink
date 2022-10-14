@@ -5,11 +5,7 @@ const DEBUG = true;
 const printDebug = DEBUG? text => console.debug("copylink b: "+text) : _ => {};
 
 function getErrorHandler(text) {
-	if (DEBUG) {
-		return error => { printDebug(text + ' ' + error); };
-	} else {
-		return undefined;
-	}
+	return DEBUG? error => { printDebug(text + ' ' + error); } : undefined;
 }
 
 
