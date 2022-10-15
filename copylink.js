@@ -1,3 +1,17 @@
+const DEBUG = false;
+
+const log = DEBUG? text => console.log("copylink c: "+ text) : _ => {};
+const printDebug = DEBUG? text => console.debug("copylink c: "+ text) : _ => {};
+
+function getErrorHandler(text) {
+	return DEBUG? error => {
+		const errorText = text + ' ' + error;
+		console.trace();
+		console.debug(errorText);
+		console.log(errorText);
+	} : undefined;
+}
+
 /*
 Contains some code from
 		 
@@ -22,26 +36,13 @@ saving the caret position.
 When you move away from the link, the caret position is restored.
 */
 
-const DEBUG = true;
-
-const log = DEBUG? text => console.log("copylink c: "+ text) : _ => {};
-const printDebug = DEBUG? text => console.debug("copylink c: "+ text) : _ => {};
-
-function getErrorHandler(text) {
-	return DEBUG? error => {
-		const errorText = text + ' ' + error;
-		console.trace();
-		console.debug(errorText);
-		console.log(errorText);
-	} : undefined;
-}
 
 (function(browser) {
 	let promises = true; // Assume running on Firefox
 	// let isEdgeBrowser = false;
 
 	// chrome will be undefined if script was not loaded from an web extension.
-	const webext = (typeof chrome !== "undefined");
+	const webext = (typeof chrome !== 'undefined');
 
 	if (webext) {
 		if (browser === chrome) {
@@ -66,9 +67,9 @@ function getErrorHandler(text) {
 	let autoHoveCopyTimeout;
 
 	function selectCopyLinkDivText(divToSelect) {
-		const selection = window.getSelection()
+		const selection = window.getSelection();
 		const range = document.createRange();
-		range.selectNodeContents(divToSelect)
+		range.selectNodeContents(divToSelect);
 	
 		if (selection.rangeCount > 0) {
 			// Check if there is currently a text caret and save it
@@ -552,8 +553,8 @@ function getErrorHandler(text) {
 
 	console.log("COPYLINK c DEBUG:" + DEBUG);
 	console.debug("COPYLINK c DEBUG:" + DEBUG);
-})(typeof browser === "undefined"? chrome : browser);
-// Must check using (typeof browser === "undefined") rather than
+})(typeof browser === 'undefined'? chrome : browser);
+// Must check using (typeof browser === 'undefined') rather than
 // use something like (browser || chrome)
 // otherwise chrome will throw an error and the extension will not load
 //
