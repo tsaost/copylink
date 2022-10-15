@@ -231,8 +231,8 @@ function getErrorHandler(text) {
 
 	console.log("COPYLINK b DEBUG:" + DEBUG);
 	console.debug("COPYLINK b DEBUG:" + DEBUG);
-})(typeof browser === "undefined"? chrome : browser);
-// Must check using (typeof browser === "undefined") rather than
+})(typeof browser === 'undefined'? chrome : browser);
+// Must check using (typeof browser === 'undefined') rather than
 // use something like (browser || chrome)
 // otherwise chrome will throw an error and the extension will not load
 //

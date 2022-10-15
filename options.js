@@ -4,7 +4,7 @@ let DEBUG = true; // will overwriten later
 // let log = DEBUG? text => console.log(text) : _ => {};
 let printDebug = DEBUG? text => console.debug(text) : _ => {};
 
-// Some of the code are from the SSS (Swift Selection Search) extension
+// Some of code is from SSS (Swift Selection Search) settings.js/.html
 // by Daniel Lobo/CanisLupus  
 
 (function(browser) {
@@ -255,8 +255,8 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 	} else {
 		browser.runtime.sendMessage(message, handleBackgroundResponse);
 	}
-})(typeof browser === "undefined"? chrome : browser);
-// Must check using (typeof browser === "undefined") rather than
+})(typeof browser === 'undefined'? chrome : browser);
+// Must check using (typeof browser === 'undefined') rather than
 // use something like (browser || chrome)
 // otherwise chrome will throw an error and the extension will not load
 //
