@@ -59,7 +59,7 @@ When you move away from the link, the caret position is restored.
 		}
 	}
 	
-	const settings = {};
+	const settings = {}; // options
 	let globalCaretPosition = -1;
 	let copyLinkDiv;
 	let tooltipDiv;
@@ -193,6 +193,7 @@ When you move away from the link, the caret position is restored.
 	// bug bug bug
 	// For whatever reason, shiftKey, ctrlKey and altkey
 	// can be wrong when checked inside mouseover?
+	// (and seems to occur under onclick as well?)
 	//
 	// So need to trap keydown and keyup to keep track
 	// of them here manually.
@@ -217,6 +218,7 @@ When you move away from the link, the caret position is restored.
 	// let metaKeyHold = false
 
 	let globalLinksText = '';
+	let lastClickLinkCopied = '';
 
 	function handleMouseClick(event) {
 		// printDebug("handleMiddleMouseClick(" + event.button + ")");
@@ -225,14 +227,19 @@ When you move away from the link, the caret position is restored.
 			const anchor = event.target.closest('a'); // getParentAnchor(target)
 			// printDebug("shiftKey(" + shiftKeyHold +
 			//  	      ") shiftLeftClick:" + settings.shiftLeftClick);
-			if (anchor && shiftKeyHold && settings.shiftLeftClick) {
+			if (anchor &&
+				settings.shiftLeftClick &&
+				(shiftKeyHold || event.shiftKey)) {
 				// Shift  Open link in new window    <- hijack shift because
 				// Ctrl   Open link in new tab		    most people seldom open
 				// Alt	  Download link					link in new window
 				event.preventDefault();
 				event.stopPropagation();
-				globalLinksText += '\n' + anchor.href;
-				// navigator.clipboard.writeText(globalLinksText);
+				if (lastClickLinkCopied !== anchor.href) {
+					lastClickLinkCopied = anchor.href;
+					globalLinksText += '\n' + anchor.href;
+					// navigator.clipboard.writeText(globalLinksText);
+				}
 				copyTextToClipboard(globalLinksText, event.pageX, event.pageY);
 			}
 		} else {
@@ -250,9 +257,11 @@ When you move away from the link, the caret position is restored.
 				// in new tab, so only highjack shift
 				printDebug("shiftKey(" + shiftKeyHold +
 						   ") shiftMiddleClick:" + settings.shiftMiddleClick);
-				if (shiftKeyHold && settings.shiftMiddleClick) {
+				if (settings.shiftMiddleClick &&
+					(shiftKeyHold || event.shiftKey)) {
 					event.preventDefault();
 					event.stopPropagation();
+					lastClickLinkCopied = anchor.href;
 					globalLinksText = anchor.href; // copy current link only
 					// navigator.clipboard.writeText(globalLinksText);
 					copyTextToClipboard(globalLinksText, 
@@ -261,9 +270,9 @@ When you move away from the link, the caret position is restored.
 			} else {
 				const close = settings.middleClickClose;
 				if (close === 'always' ||
-					(close === 'shift' && shiftKeyHold) ||
-					(close === 'control' && ctrlKeyHold) ||
-					(close === 'alt' && altKeyHold)) {
+					(close === 'shift' && event.shiftKey) ||
+					(close === 'control' && event.ctrlKey) ||
+					(close === 'alt' && event.altKey)) {
 					printDebug("runtime.sendMessage(close)");
 					browser.runtime.sendMessage({type: 'close'}, reply =>
 												console.info(reply.farewell));
@@ -395,9 +404,12 @@ When you move away from the link, the caret position is restored.
 						   " alt: " + altKeyHold);
 				if (!(globalLeftMouseDown || autoHoveCopyTimeout) &&
 					(autoCopy === 'always' ||
-					 (autoCopy === 'shift' && shiftKeyHold) ||
-					 (autoCopy === 'control' && ctrlKeyHold) ||
-					 (autoCopy === 'alt' && altKeyHold))) {
+					 (autoCopy === 'shift' &&
+					  (shiftKeyHold || event.shiftKey)) ||
+					 (autoCopy === 'control' &&
+					  (ctrlKeyHold || event.ctrlKey)) ||
+					 (autoCopy === 'alt' &&
+					  (altKeyHold || event.altKey)))) {
 					savedPageX = event.pageX;
 					savedPageY = event.pageY;
 					printDebug("setTimeout(" + anchor.href + ")");
@@ -496,9 +508,13 @@ When you move away from the link, the caret position is restored.
 //						window.addEventListener('keyup', keyUpDownHandler);
 //						window.addEventListener('keydown', keyUpDownHandler);
 //					}
-//				} 
-				window.addEventListener('keyup', keyUpDownHandler);
-				window.addEventListener('keydown', keyUpDownHandler);
+//				}
+				if (settings.modifierKeyTracking) {
+					window.addEventListener('keyup', keyUpDownHandler);
+					window.addEventListener('keydown', keyUpDownHandler);
+				} else {
+					shiftKeyHold = ctrlKeyHold = altKeyHold = false;
+				}
 			}
 		}
 
