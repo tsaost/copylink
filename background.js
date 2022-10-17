@@ -42,6 +42,7 @@ function ErrorHandler(text) {
 		maxTooltip: 200,
 		shiftLeftClick: true,
 		shiftMiddleClick: true,
+		modifierKeyTracking: false,
 		middleClickClose: 'never',//'never', 'always', 'shift', 'control', 'alt'
 		sectionsExpansionState: {} // this is for options.js
 	}
@@ -59,7 +60,8 @@ function ErrorHandler(text) {
 		maxTooltip: undefined,
 		shiftLeftClick: undefined,
 		shiftMiddleClick: undefined,
-		middleClickClose: undefined
+		middleClickClose: undefined,
+		modifierKeyTracking: undefined
 	}
 		
 	
