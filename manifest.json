@@ -5,7 +5,7 @@
     "description": "Hover over a link and copy using Ctrl-C/Cmd-C, or click on it with middle mouse button while holding the shift key.  You can also copy multiple links using shfit + left mouse click.",
 
     "browser_specific_settings": {
-      "gecko": { "id": "clickcopylink.t_s_a_o_s_t@gmail.com" }
+      "gecko": { "id": "clickcopylink.t_s_a_o_s_t@g.m.a.i.l.com" }
     },
 
     "content_scripts": [{
