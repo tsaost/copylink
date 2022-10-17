@@ -27,7 +27,7 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 		// isEdgeBrowser = true;
 	}
 	
-	function getErrorHandler(text) {
+	function ErrorHandler(text) {
 		return DEBUG? error => alert(text + ' ' + error) : undefined;
 	}
 
@@ -163,7 +163,7 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 		if (promises) {
 			browser.storage.local.set(items).
 				then(_ => {},
-					 getErrorHandler("Error saving local settings."));
+					 ErrorHandler("Error saving local settings."));
 		} else {
 			browser.storage.local.set(items);
 		}
@@ -251,7 +251,7 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 	if (promises) {
 		browser.runtime.sendMessage(message).
 			then(handleBackgroundResponse, 
-				 getErrorHandler("Error requesting setting from background"));
+				 ErrorHandler("Error getting setting from background"));
 	} else {
 		browser.runtime.sendMessage(message, handleBackgroundResponse);
 	}

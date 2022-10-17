@@ -4,7 +4,7 @@ const DEBUG = true;
 
 const printDebug = DEBUG? text => console.debug("copylink b: "+text) : _ => {};
 
-function getErrorHandler(text) {
+function ErrorHandler(text) {
 	return DEBUG? error => {
 		const errorText = text + ' ' + error;
 		console.trace();
@@ -119,7 +119,7 @@ function getErrorHandler(text) {
 				.then(items => {
 					updateWithSettings(items);
 					updateSettingsOnAllTabs();
-				}, getErrorHandler("Error reading local settings."));
+				}, ErrorHandler("Error reading local settings."));
 		} else {
 			browser.storage.local.get(null, items => {
 				updateWithSettings(items);
@@ -136,9 +136,6 @@ function getErrorHandler(text) {
 			return;
 		}
 	
-		const title = tab.title;
-		// printDebug("from content page" + sender.tab.url + ", " + title);
-	
 		printDebug("onContentScriptMessage(" + msg.type + ")");
 		switch (msg.type) {
 		case 'content-settings':
@@ -150,11 +147,12 @@ function getErrorHandler(text) {
 			break;
 	
 		case 'close':
-			sendResponse({farewell: "goodbye: " + title});
+			sendResponse({farewell: "goodbye: " + tab.title});
 			chrome.tabs.remove(tab.id, _ => {});
 			break;
-	
+
 		default:
+			printDebug("Unknown msg.type(" + msg.type + ")"); break;
 			break;
 		}
 	}
@@ -169,8 +167,7 @@ function getErrorHandler(text) {
 				const promise = browser.tabs.sendMessage(tab.id, message);
 				if (promise) {
 					promise.then(_ => {},
-								 getErrorHandler("Error sending setting:" +
-												 tab.id));
+								 ErrorHandler("Error sending setting:"+tab.id));
 				}
 			}
 		};
@@ -178,7 +175,7 @@ function getErrorHandler(text) {
 		if (promises) {
 			browser.tabs.query({}).
 				then(sendSettingsToTabs,
-					 getErrorHandler("Error querying tabs."));
+					 ErrorHandler("Error querying tabs."));
 		} else {
 			browser.tabs.query({}, sendSettingsToTabs);
 		}
