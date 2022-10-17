@@ -3,7 +3,7 @@ const DEBUG = false;
 const log = DEBUG? text => console.log("copylink c: "+ text) : _ => {};
 const printDebug = DEBUG? text => console.debug("copylink c: "+ text) : _ => {};
 
-function getErrorHandler(text) {
+function ErrorHandler(text) {
 	return DEBUG? error => {
 		const errorText = text + ' ' + error;
 		console.trace();
@@ -155,7 +155,7 @@ When you move away from the link, the caret position is restored.
 			const promise = navigator.clipboard.writeText(text);
 			if (promise) {
 				promise.then(_ => printDebug("clipboard.writeText:" + text),
-							 getErrorHandler("Error clipboard.writeText"));
+							 ErrorHandler("Error clipboard.writeText"));
 			}
 		}
 
@@ -508,7 +508,7 @@ When you move away from the link, the caret position is restored.
 				browser.runtime.sendMessage(contentSettingMessage).
 					then(reply =>
 						 updateSettings(reply.settingsForContentScript),
-						 getErrorHandler("Error get settings from background"));
+						 ErrorHandler("Error background content-settings:"));
 			} else {
 				browser.runtime.
 					sendMessage(contentSettingMessage, reply =>
