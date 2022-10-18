@@ -1,15 +1,12 @@
-'use strict'
 
-let DEBUG = true; // will overwriten later 
-// let log = DEBUG? text => console.log(text) : _ => {};
-let printDebug = DEBUG? text => console.debug(text) : _ => {};
-
-// Some of code is from SSS (Swift Selection Search) settings.js/.html
-// by Daniel Lobo/CanisLupus  
 
 (function(browser) {
+	'use strict'
+
 	let defaultSettings;
 	let settings;
+	let errorAlert, printWarning, printLog, printInfo, printDebug;
+
 	const page = {};
 
     let promises = true; // Assume running on Firefox
@@ -27,10 +24,6 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 		// isEdgeBrowser = true;
 	}
 	
-	function ErrorHandler(text) {
-		return DEBUG? error => alert(text + ' ' + error) : undefined;
-	}
-
 	function updatePage() {
 		// console.trace();
         for (const item of page.inputs) {
@@ -60,14 +53,16 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 			} else {
 				item.value = value;
 			}
-			updatePageElement(name, value);
+			updateOptionsVisiblity(name, value);
 		}
     }
 
 
-    function updatePageElement(name, value) {
-        const setVisiblity = (element, visible) => 
-            element.closest('.setting').classList.toggle('hidden', visible);
+    function updateOptionsVisiblity(name, value) {
+        const setVisiblity = (element, visible) => {
+			printDebug("setVisiblity(" + name + "): " + visible);
+            element.closest('.setting').classList.toggle('hidden', !visible);
+		};
 
         switch (name) {
 		case 'autoHoverCopy': {
@@ -79,7 +74,23 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 			setVisiblity(page.maxTooltip, value);
 			break;
 
+		case 'debugLevel':
+			printDebug("debugLevel: " + value);
+			setVisiblity(page.debugHostPrefix, value !== '0');
+			break;
+
+		case 'shiftLeftClick':
+		case 'shiftMiddleClick':
+		case 'maxTooltip':
+		case 'autoHoverDelay':
+		case 'modifierKeyTracking':
+		case 'middleClickClose':
+		case 'debugHostPrefix':
+			printDebug("updateOptionsVisiblity: nothign to do.");
+			break;
+
 		default:
+			errorAlert("Bad updateOptionsVisiblity("+ name + ", " + value +")");
 			break;
         }
     }
@@ -88,7 +99,7 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 	let globalIntializingPage = true;
 
     function initializePage() {
-		// printDebug("initializePage(): " + DEBUG);
+		printLog("initializePage() debugLevel:" + settings.debugLevel);
         page.inputs = document.querySelectorAll("input, select, textarea");
         for (const item of page.inputs) {
 			const name = item.name;
@@ -110,8 +121,8 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 				} else {
 					value = item.value;
 				}
-				printDebug("onchange target: " + name + " -> " + value);
-				updatePageElement(name, value);
+				printInfo("onchange target: " + name + " -> " + value);
+				updateOptionsVisiblity(name, value);
 				if (!globalIntializingPage) {
 					saveNewSettings({[name]: value});
 				}
@@ -130,7 +141,7 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
                 const formElement = parent.querySelector('.setting-input');
                 const name = formElement.name;
                 const value = defaultSettings[name];
-				printDebug("reset setting[" + name + "]=" + value);
+				printWarning("reset setting[" + name + "]=" + value);
                 saveNewSettings({[name]: value});
                 loadSettingValueIntoElement(formElement);
             };
@@ -169,7 +180,7 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 		}
 
 		// Print warnings when certain options are changed.
-		for (name in items) {
+		for (const name in items) {
 			const value = items[name];
 			switch (name) {
 			case 'middleClickClose':
@@ -188,11 +199,11 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 //						  'use the "Always (On)" option.');
 //				}
 //			} break;
-				alertAutoHoverCopyShiftLeftClickConflict() ;
+				alertAutoHoverCopyShiftLeftClickConflict();
 				break;
 
 			case 'shiftLeftClick':
-				alertAutoHoverCopyShiftLeftClickConflict() ;
+				alertAutoHoverCopyShiftLeftClickConflict();
 				break;
 			}
 		}
@@ -217,41 +228,39 @@ let printDebug = DEBUG? text => console.debug(text) : _ => {};
 
 
     document.addEventListener("DOMContentLoaded", _ => {
-		printDebug("DOMContentLoaded: " + defaultSettings);
         if (defaultSettings === undefined) {
+			console.debug("DOMContentLoaded before content-settings");
 			// hack hack hack
 			// let 'content-settings' handler know that DOM has been loaded
-			DEBUG = ''; 
+			defaultSettings = ''; 
 		} else {
             initializePage();
         }
     });
 
+
 	function handleBackgroundResponse(response) {
-		defaultSettings = response.defaultSettings;
 		settings = response.settings;
-		if (response.DEBUG) {
-			// log = text => console.log("copylink o: " + text);
-			printDebug = text => console.debug("copylink o: " + text);
-			printDebug("defaultSettings:" + defaultSettings);
-			printDebug("settings:" + settings);
-		} 
-		if (DEBUG === '') {
-			// Since sendMessage is async, we have to check
-			// if DOMContentLoaded has ocurred and call initializePage()
-			// if it has.  Otherwise let initializePage() be called by
+		[errorAlert, printWarning, printLog, printInfo, printDebug] =
+			getConsolePrintList("copylink o: ", settings.debugLevel);
+		printDebug("defaultSettings:" + defaultSettings);
+		printDebug("settings:" + settings);
+		const domLoaded = (defaultSettings === '');
+		defaultSettings = response.defaultSettings;
+		if (domLoaded) {
+			// sendMessage is async, so we have to check if DOMContentLoaded
+			// has ocurred and call initializePage() if (domLoaded) is true
+			// Otherwise let initializePage() be called by
 			// the DOMContentLoaded event handler above.
 			initializePage();
 		} 
-		DEBUG = response.DEBUG;
 	}
-
 
 	const message = { type: 'all-settings' };
 	if (promises) {
 		browser.runtime.sendMessage(message).
 			then(handleBackgroundResponse, 
-				 ErrorHandler("Error getting setting from background"));
+				 ErrorHandler("Error requesting options from background.js"));
 	} else {
 		browser.runtime.sendMessage(message, handleBackgroundResponse);
 	}
