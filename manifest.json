@@ -8,9 +8,14 @@
       "gecko": { "id": "clickcopylink.t_s_a_o_s_t@g.m.a.i.l.com" }
     },
 
+    "background": {
+       "scripts": ["console.js", "background.js"],
+       "persistent": true
+    },
+
     "content_scripts": [{
          "matches": ["<all_urls>"],
-         "js": ["copylink.js"],
+         "js": ["console.js", "copylink.js"],
          "css": ["copylink.css"]
     }],
 
@@ -36,11 +41,5 @@
     "options_ui": {
 	"page": "options.html",
 	"open_in_tab": true
-    },
-
-    "background": {
-       "scripts": ["background.js"],
-       "persistent": false
     }
-
 }
