@@ -1,16 +1,12 @@
-const DEBUG = false;
+'use strict'
 
-const log = DEBUG? text => console.log("copylink c: "+ text) : _ => {};
-const printDebug = DEBUG? text => console.debug("copylink c: "+ text) : _ => {};
+const locationHref = window.location.href;
 
-function ErrorHandler(text) {
-	return DEBUG? error => {
-		const errorText = text + ' ' + error;
-		console.trace();
-		console.debug(errorText);
-		console.log(errorText);
-	} : undefined;
-}
+const TEST = locationHref.endsWith('/test.html') &&
+	(locationHref.startsWith('moz-extension://') ||
+	 locationHref.startsWith('chrome-extension://'));
+	
+
 
 /*
 Contains some code from
@@ -38,6 +34,8 @@ When you move away from the link, the caret position is restored.
 
 
 (function(browser) {
+	'use strict'
+
 	let promises = true; // Assume running on Firefox
 
 	// chrome will be undefined if script was not loaded from an web extension.
@@ -59,6 +57,8 @@ When you move away from the link, the caret position is restored.
 	}
 	
 	const settings = {}; // options
+	let errorAlert, printWarn, printLog, printInfo, printDebug;
+
 	let globalCaretPosition = -1;
 	let copyLinkDiv;
 	let tooltipDiv;
@@ -76,7 +76,7 @@ When you move away from the link, the caret position is restored.
 			// actually a text selection (window.getSelection().toString()!=='')
 			// so we only need to save the caret (i.e., start of the selection)
 			globalCaretPosition = document.activeElement.selectionStart;
-			// printDebug("globalCaretPosition: " + globalCaretPosition);
+			printLog("globalCaretPosition: " + globalCaretPosition);
 		}
 		// if (selection.rangeCount > 0) {
 		//    selection.removeAllRanges();
@@ -129,7 +129,7 @@ When you move away from the link, the caret position is restored.
 	
 	
 	function copyTextToClipboard(text, x, y) {
-		printDebug("copyTextToClipboard(" + x + ", " + y + "): " + text);
+		printLog("copyTextToClipboard(" + x + ", " + y + "): " + text);
 
 		if (window.location.href.startsWith('http://')) {
 			// https://developer.mozilla.org/en-US/docs/Mozilla/
@@ -153,13 +153,13 @@ When you move away from the link, the caret position is restored.
 			// clipboard.writeText if possible
 			const promise = navigator.clipboard.writeText(text);
 			if (promise) {
-				promise.then(_ => printDebug("clipboard.writeText:" + text),
+				promise.then(_ => printInfo("clipboard.writeText:" + text),
 							 ErrorHandler("Error clipboard.writeText"));
 			}
 		}
 
 		if (autoHoveCopyTimeout) {
-			printDebug("0 clearTimeout(autoHoveCopyTimeout)");
+			printInfo("0 clearTimeout(autoHoveCopyTimeout)");
 			clearTimeout(autoHoveCopyTimeout);
 			autoHoveCopyTimeout = null;
 		}
@@ -167,7 +167,7 @@ When you move away from the link, the caret position is restored.
 		printDebug("show tooltip(" + x + ", " + y + ")");
 		if (settings.clipboardCopyTooltip && (x > 0 || y > 0)) {
 			if (!tooltipDiv) {
-				printDebug("createTooltip()");
+				printLog("createTooltip()");
 				createTooltip();
 			}
 			let tooltipText = text;
@@ -254,8 +254,8 @@ When you move away from the link, the caret position is restored.
 			if (anchor) {
 				// by default, shift/ctrl/alt + middle click all just open link
 				// in new tab, so only highjack shift
-				printDebug("shiftKey(" + shiftKeyHold +
-						   ") shiftMiddleClick:" + settings.shiftMiddleClick);
+				printInfo("shiftKey(" + shiftKeyHold +
+						 ") shiftMiddleClick:" + settings.shiftMiddleClick);
 				if (settings.shiftMiddleClick &&
 					(shiftKeyHold || event.shiftKey)) {
 					event.preventDefault();
@@ -272,7 +272,7 @@ When you move away from the link, the caret position is restored.
 					(close === 'shift' && event.shiftKey) ||
 					(close === 'control' && event.ctrlKey) ||
 					(close === 'alt' && event.altKey)) {
-					printDebug("runtime.sendMessage(close)");
+					printWarn("runtime.sendMessage(close)");
 					browser.runtime.sendMessage({type: 'close'}, reply =>
 												console.info(reply.farewell));
 				}
@@ -316,7 +316,6 @@ When you move away from the link, the caret position is restored.
 		// The downside is that there will be more calls to the mouseover
 		// handler whereas handler for mouseenter is only called when the
 		// mouse is over the element
-		log("setup()");
 
 		function keyUpDownHandler(event) {
 			shiftKeyHold = event.shiftKey;
@@ -395,7 +394,7 @@ When you move away from the link, the caret position is restored.
 						selectCopyLinkDivText(copyLinkDiv);
 					}
 				} else if (autoCopy === 'never') {
-					printDebug("Something already selected. Skip auto select");
+					printLog("Something already selected. Skip auto select");
 				} 
 				printDebug("autoHoverCopy:" + autoCopy +
 						   " shift:" + shiftKeyHold +
@@ -411,7 +410,7 @@ When you move away from the link, the caret position is restored.
 					  (altKeyHold || event.altKey)))) {
 					savedPageX = event.pageX;
 					savedPageY = event.pageY;
-					printDebug("setTimeout(" + anchor.href + ")");
+					printInfo("setTimeout(" + anchor.href + ")");
 					autoHoveCopyTimeout =  setTimeout(_ => {
 						autoHoveCopyTimeout = null;
 						copyTextToClipboard(anchor.href,
@@ -487,7 +486,7 @@ When you move away from the link, the caret position is restored.
 				}
 			}
 			if (links.length) {
-				printDebug("copy to clipboard:" + links.join("\n"));
+				printLog("copy to clipboard:" + links.join("\n"));
 				navigator.clipboard.writeText(links.join("\n"));
 			} else {
 				alert("No link has been found in the selection");
@@ -495,9 +494,15 @@ When you move away from the link, the caret position is restored.
 		}
 
 		function updateSettings(items) {
+			const prefix = items.debugHostPrefix?
+				(new URL(locationHref).host + " copylink c: ") : "copylink c: ";
+			[errorAlert, printWarn, printLog, printInfo, printDebug] =
+				getConsolePrintList(prefix, items.debugLevel);
+			printLog("updateSettings(items)");
 			for (const key in items) {
 				const value = items[key];
-				printDebug("update settings[" + key + "] to " + value);
+				// getConsolePrintList() not called yet
+				// console.debug("update settings[" + key + "] to " + value);
 				settings[key] = value;
 //				if (key === 'autoHoverCopy') {
 //					if (value === 'always' || value === 'never') {
@@ -525,6 +530,7 @@ When you move away from the link, the caret position is restored.
 						 updateSettings(reply.settingsForContentScript),
 						 ErrorHandler("Error background content-settings:"));
 			} else {
+				console.warn("No promise sendMessage(contentSettingMessage)");
 				browser.runtime.
 					sendMessage(contentSettingMessage, reply =>
 								updateSettings(reply.settingsForContentScript));
@@ -539,6 +545,7 @@ When you move away from the link, the caret position is restored.
 						updateSettings(msg.settingsForContentScript);
 						break;
 						default:
+						errorAlert("Unknown msg.type:" + msg.type);
 						break;
 					}
 				});
@@ -557,7 +564,7 @@ When you move away from the link, the caret position is restored.
 		}
 	} // setup();
 
-	if (webext) {
+	if (webext && !TEST) {
 		// Running from content_scripts
 		setup();
 	} else {
@@ -566,8 +573,6 @@ When you move away from the link, the caret position is restored.
 		window.addEventListener('load', setup);
 	}
 
-	console.log("COPYLINK c DEBUG:" + DEBUG);
-	console.debug("COPYLINK c DEBUG:" + DEBUG);
 })(typeof browser === 'undefined'? chrome : browser);
 // Must check using (typeof browser === 'undefined') rather than
 // use something like (browser || chrome)

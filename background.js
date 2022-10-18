@@ -1,20 +1,8 @@
-'use strict'
-
-const DEBUG = true;
-
-const printDebug = DEBUG? text => console.debug("copylink b: "+text) : _ => {};
-
-function ErrorHandler(text) {
-	return DEBUG? error => {
-		const errorText = text + ' ' + error;
-		console.trace();
-		console.debug(errorText);
-		console.log(errorText);
-	} : undefined;
-}
-
 (function(browser) {
+	'use strict'
+
     let promises = true; // Assume running on Firefox
+
 	// let isEdgeBrowser = false;
 	if (browser === chrome) {
 		// If browser === chrome, then the extension was loaded into Chrome.
@@ -36,19 +24,22 @@ function ErrorHandler(text) {
 		// Warning: At least as of Firefox 48, the Windows key is no longer
 		// considered the "Meta" key. KeyboardEvent.metaKey is false when
 		// the Windows key is pressed.
-		autoHoverCopy: 'never', // 'never', 'always', 'shift', 'control', 'alt'
+		autoHoverCopy: 'never', // never always shift control alt
 		autoHoverDelay: 300,
 		clipboardCopyTooltip: true,
 		maxTooltip: 200,
 		shiftLeftClick: true,
 		shiftMiddleClick: true,
 		modifierKeyTracking: false,
-		middleClickClose: 'never',//'never', 'always', 'shift', 'control', 'alt'
+		middleClickClose: 'never', // never always shift control alt
+		debugLevel: 3, // 0:none, 1:error 2:warn 3:log 4:info 5:debug
+		debugHostPrefix: true,
 		sectionsExpansionState: {} // this is for options.js
 	}
 	
 	let settings;
-	
+	let errorAlert, printWarn, printLog, printInfo, printDebug;
+
 	// At this point, settingsForContentScript has all the same attributes
 	// as setting.  In the future maybe settingsForContentScript will be
 	// an subset of settings
@@ -61,12 +52,18 @@ function ErrorHandler(text) {
 		shiftLeftClick: undefined,
 		shiftMiddleClick: undefined,
 		middleClickClose: undefined,
-		modifierKeyTracking: undefined
+		modifierKeyTracking: undefined,
+		debugLevel: undefined,
+		debugHostPrefix: true
 	}
 		
 	
 	function sanitizeSettings(items) {
-		printDebug("sanitizeSettings(" + Object.keys(items) + ")");
+		if (printLog) {
+			printLog("sanitizeSettings(" + Object.keys(items) + ")");
+		} else {			
+			console.log("sanitizeSettings(items)");
+		}
 		// Make  copy so that defaultSettings is not changed
 		// when doing: settings[key] = defaultValues[key]
 		const defaults = Object.assign({}, defaultSettings);
@@ -74,7 +71,7 @@ function ErrorHandler(text) {
 			// Fix any key that is missing
 			if (!(key in items)) {
 				items[key] = defaults[key];
-				printDebug("missing items[" + key + "]=" + items[key]);
+				console.warn("missing items[" + key + "]=" + items[key]);
 			}
 		}
 	
@@ -89,7 +86,7 @@ function ErrorHandler(text) {
 		for (const key in items) {
 			// Remove any key that is no longer used
 			if (!(key in defaults) && key !== 'sectionsExpansionState') {
-				printDebug("delete items[" + key + "]");
+				console.warn("delete items[" + key + "]");
 				delete items[key];
 			}
 		}
@@ -102,26 +99,29 @@ function ErrorHandler(text) {
 		for (const key in settingsForContentScript) {
 			settingsForContentScript[key] = items[key];
 		}
+		[errorAlert, printWarn, printLog, printInfo, printDebug] =
+			getConsolePrintList("copylink b: ", settings.debugLevel);
 	}
 	
 	
 	browser.storage.onChanged.addListener(onSettingsChanged);
 	browser.runtime.onMessage.addListener(onContentScriptMessage);
 	
-	onSettingsChanged(undefined, 'local');
-	
 	function onSettingsChanged(changes, area) {
-		if (area !=='local') {
-			printDebug("onSettingsChanged(" + area + ")");
+		if (area !== 'local') {
+			console.warn("Not local onSettingsChanged(" + area + ")");
 			return;
 		}
-		printDebug("onSettingsChanged(changes," + area + ")");
+		if (defaultSettings.debugLevel > 4) {
+			// getConsolePrintList() not called yet
+			console.debug("onSettingsChanged(changes," + area + ")");
+		}
 		if (promises) {
 			browser.storage.local.get()
 				.then(items => {
 					updateWithSettings(items);
 					updateSettingsOnAllTabs();
-				}, ErrorHandler("Error reading local settings."));
+				}, ErrorHandler("Error reading local settings"));
 		} else {
 			browser.storage.local.get(null, items => {
 				updateWithSettings(items);
@@ -134,11 +134,11 @@ function ErrorHandler(text) {
 	function onContentScriptMessage(msg, sender, sendResponse) {
 		const tab = sender.tab;
 		if (!tab) {
-			printDebug("from extension");
+			printWarn("from extension");
 			return;
 		}
 	
-		printDebug("onContentScriptMessage(" + msg.type + ")");
+		printInfo("onContentScriptMessage(" + msg.type + ")");
 		switch (msg.type) {
 		case 'content-settings':
 			sendResponse({settingsForContentScript});
@@ -154,7 +154,7 @@ function ErrorHandler(text) {
 			break;
 
 		default:
-			printDebug("Unknown msg.type(" + msg.type + ")"); break;
+			errorAlert("Unknown msg.type(" + msg.type + ")");
 			break;
 		}
 	}
@@ -169,7 +169,7 @@ function ErrorHandler(text) {
 				const promise = browser.tabs.sendMessage(tab.id, message);
 				if (promise) {
 					promise.then(_ => {},
-								 ErrorHandler("Error sending setting:"+tab.id));
+								 ErrorHandler("Error sending setting"+ tab.id));
 				}
 			}
 		};
@@ -177,7 +177,7 @@ function ErrorHandler(text) {
 		if (promises) {
 			browser.tabs.query({}).
 				then(sendSettingsToTabs,
-					 ErrorHandler("Error querying tabs."));
+					 ErrorHandler("Error querying tabs"));
 		} else {
 			browser.tabs.query({}, sendSettingsToTabs);
 		}
@@ -190,7 +190,7 @@ function ErrorHandler(text) {
 	browser.browserAction.onClicked.addListener((tab, clickData) => {
 		// https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/
 		// WebExtensions/API/tabs/sendMessage
-		printDebug("browserAction.onClicked => " + tab.id + " search");
+		printLog("browserAction.onClicked => " + tab.id + " search");
 		browser.tabs.sendMessage(tab.id, { type: 'copylink', clickData });
 	});
 	
@@ -204,6 +204,16 @@ function ErrorHandler(text) {
 					 title: "CCL Options",
 					 contexts: ['browser_action'] });
 		}
+
+
+		if (defaultSettings.debugLevel > 2) {
+			browser.contextMenus.create(
+			{id: 'test',
+					 title: "Test CCL",
+					 contexts: ['browser_action'] });
+
+		}
+	
 
 		// Create the browser action menu item to open the about page.
 		browser.contextMenus.create(
@@ -221,15 +231,19 @@ function ErrorHandler(text) {
 				break;
 				case 'about':
 				browser.tabs.create({ url: 'about.html' });
+				case 'test':
+				browser.tabs.create({ url: 'test.html' });
 				break;
 				default:
+				errorAlert("Unknown info.menuItemId:" + info.menuItemId);
 				break;
 			}
 		});
 	}
 
-	console.log("COPYLINK b DEBUG:" + DEBUG);
-	console.debug("COPYLINK b DEBUG:" + DEBUG);
+	console.clear();
+	onSettingsChanged(undefined, 'local');
+
 })(typeof browser === 'undefined'? chrome : browser);
 // Must check using (typeof browser === 'undefined') rather than
 // use something like (browser || chrome)
