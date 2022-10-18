@@ -185,319 +185,12 @@
     content: "\00a0\00a0\00a0\00a0"; 
   }
 
-  /* search engines "table" */
-
-  #engines-table {
-    width: 100%;
-    padding-bottom: 20px;
-  }
-  #engines-table * {
-    font-size: 0.8rem;
-  }
-  .engine-table-row {
-    width: 100%;
-    display: flex;
-    flex-flow: column;
-  }
-  .engine-itself {
-    width: 100%;
-    display: flex;
-  }
-  .engine-options {
-    margin-left: 103px;	 /* 24 + 24 + 24 + 24 + 4 (dragger + icon + 4px margin-right) + 3 (just padding) */
-    margin-top: 3px;
-    margin-bottom: 4px;
-    display: none;
-  }
-  .engine-table-row:not(.static-row):hover {
-    background: #c6e3ff88;
-  }
-  .engine-itself > div,
-  .engine-options > div {
-    margin: 1px;
-  }
-  .engine-dragger {
-    cursor: move;
-  }
-  .engine-dragger,
-  .engine-is-enabled,
-  .engine-is-enabled-in-context-menu,
-  .engine-icon-img {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 22px;
-  }
-  .engine-shortcut {
-    width: 30px;
-  }
-  .engine-shortcut input {
-    text-transform: uppercase;
-    text-align: center;
-  }
-  .engine-delete {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 22px;
-  }
-  .engine-icon-img {
-    margin-right: 5px !important;
-  }
-  .engine-icon-img img {
-    padding: 0;
-    width: 22px;
-  }
-  .engine-name {
-    width: 15%;
-  }
-  .engine-search-link,
-  .engine-description-small {
-    width: 50%;
-  }
-  .engine-icon-link {
-    width: 35%;
-  }
-  .engine-uneditable {
-    padding: 4px 4px;
-    border: 1px solid #e5e5e5;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-  }
-  .engine-uneditable-name {
-    width: 14.8%;  /* small width adjustment to look better in relation with editable elements with 15% */
-    overflow-x: hidden;	 /* fixes cell staying too wide on a narrow window */
-  }
-  .engine-uneditable-description {
-    width: 85%;
-  }
-  .engine-add-button {
-    max-width: 150px;
-    min-width: 0px;
-    width: 30%;
-  }
-
-  /* group popup */
-
-  #group-popup-container {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 90vw;
-    height: 90vh;
-    max-width: 500px;
-    max-height: 650px;
-    background-color: #F9F9FA;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    min-height: 150px;	/* avoids visual glitches when window is REALLY short */
-  }
-  #group-background-div {
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    background-color: black;
-    opacity: 0.8;
-    width: 100vw;
-    height: 100vh;
-  }
-  #group-popup-header {
-    display: flex;
-    padding: 0.6rem;
-  }
-  #group-icon-img,
-  #group-icon-canvas {
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 24px;
-    height: 24px;
-  }
-  #group-icon-img:hover,
-  #group-icon-canvas:hover {
-    transform: scale(1.2, 1.2);
-  }
-  #group-popup-header > input {
-    margin-left: 0.3rem;
-  }
-  #group-popup-header > label {
-    display: flex;
-    align-items: center;
-    padding: 0.2rem;
-  }
-  #group-title-field {
-    overflow-x: auto;  /* avoids visual glitches when window is REALLY narrow */
-  }
-  #group-popup-content {
-    overflow-y: scroll;
-  }
-  #group-selected-engines-container {
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-  #group-selected-engines-container > div {
-    cursor: default;
-  }
-  #group-selected-engines-container .group-engines-list-row:hover .group-remove-engine-button {
-    visibility: visible;
-  }
-  #group-selected-engines-container:empty {
-    text-align: center; /* can't format this inside ::before */
-  }
-  #group-selected-engines-container:empty::before {
-    content: "Choose the engines that will belong to this group:";
-    padding: 0.5rem;
-    font-size: 0.9rem;
-    font-style: italic;
-    text-align: center;
-  }
-  .group-remove-engine-button {
-    margin-left: auto !important;
-    margin-right: 1rem !important;
-    visibility: hidden;
-  }
-  .group-engines-list-row {
-    display: flex;
-    flex-direction: row;
-    cursor: pointer;
-    padding-left: 0.5rem;
-    user-select: none;	  /* only added in Firefox 69 */
-    -moz-user-select: none;  /* support for older versions */
-    align-items: center;
-  }
-  .group-engines-list-row:hover {
-    background: #c6e3ff88;
-  }
-  .group-engines-list-row > * {
-    margin: 0.2rem;
-  }
-  .group-engines-list-row .engine-dragger {
-    text-align: center;
-    min-width: 30px;
-  }
-  .group-engines-list-row .engine-icon-img {
-    text-align: center;
-    min-width: 30px;
-  }
-  .group-engines-list-row .engine-icon-img > img {
-    width: 22px;
-    height: 22px;
-  }
-  #group-popup-footer {
-    display: flex;
-    border-radius: 4px;
-    width: 100%;
-    padding: 0.6rem;
-    margin-top: auto;  /* pushes footer to the bottom */
-  }
-  #group-popup-footer > * {
-    margin: 0.2rem;
-  }
-  .group-engine-description {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-  }
-
   /* platform/version specific elements */
 
   .os-windows, .os-mac, .os-linux {
     display: none;
   }
 
-  /* specifics */
-
-  #section_instructions li,
-  #section_instructions summary {
-    padding-top: 3px;
-    padding-bottom: 3px;
-  }
-
-  #section_instructions ul li ul {
-    padding-left: 20px;
-  }
-
-  /* emphasizes text */
-  pop,
-  popm {
-    background: #eee;
-    white-space: nowrap;
-  }
-
-  /* emphasizes text, but monospaced */
-  popm {
-    font-family: "Courier New", Courier, mono;
-  }
-
-  /********************/
-  /* DARK MODE COLORS */
-  /********************/
-
-  input[name="toggleDarkMode"] {
-    max-width: 50px;
-  }
-
-  body.dark {
-    color: #eee;
-    background-color: #181A1B;
-  }
-  body.dark input[type=text],
-  body.dark input[type=number],
-  body.dark input[type=button],
-  body.dark input[type=color],
-  body.dark textarea,
-  body.dark select {
-    border: 1px solid #45454b;
-    color: #eee;
-    background-color: #2a2a31;
-  }
-  body.dark input[type=button] {
-    border: 1px solid #7f93a6;
-    background-color: #45454b;	/* make them different from other inputs */
-  }
-  body.dark optgroup {
-    background-color: #161618;
-  }
-
-  body.dark .section-name {
-    color: #ddd;
-  }
-
-  body.dark .setting {
-    border-bottom: 1px #45454b solid;
-  }
-  body.dark .setting:hover {
-    background-color: #0e0e0f;
-  }
-
-  body.dark .setting-description,
-  body.dark .setting-description * {
-    color: #ddd;
-  }
-
-  body.dark .engine-uneditable {
-    border: 1px solid #45454b;
-    background-color: #45454b;
-  }
-  body.dark .engine-table-row:not(.static-row):hover {
-    background: #3c3c42;
-  }
-
-  body.dark pop,
-  body.dark popm {
-    background: #2a2a31;
-  }
-
-  body.dark #group-popup-container {
-    background-color: #181A1B;
-  }
-  body.dark .group-engines-list-row:hover {
-    background: #3c3c42;
-  }
 </style>
 <title>Click Copy Link Options</title>
 <link rel="shortcut icon" type="image/png" href="/icons/link48.png"/>
@@ -553,7 +246,7 @@
       <div class="setting">
 	<div class="setting-name">Shift + left click</div>
 	<div class="setting-value">
-	  <input class="setting-input" type="checkbox" name="shiftLeftClick" autocomplete="off">
+	  <input class="setting-input" type="checkbox" name="shiftLeftClick">
 	</div>
 	<div class="setting-description">When left clicking on a link while
 	holding the shift key the link will be concatenated to the last link.
@@ -567,7 +260,7 @@
       <div class="setting">
 	<div class="setting-name">Shift + middle click</div>
 	<div class="setting-value">
-	  <input class="setting-input" type="checkbox" name="shiftMiddleClick" autocomplete="off">
+	  <input class="setting-input" type="checkbox" name="shiftMiddleClick">
 	</div>
 	<div class="setting-description">When middle clicking on a link while
 	holding the shift key the link will be copied to the clipboard.
@@ -580,7 +273,7 @@
       <div class="setting">
 	<div class="setting-name">Clipboard copy tooltip</div>
 	<div class="setting-value">
-	  <input class="setting-input" type="checkbox" name="clipboardCopyTooltip" autocomplete="off">
+	  <input class="setting-input" type="checkbox" name="clipboardCopyTooltip">
 	</div>
 	<div class="setting-description">Show a tooltip of the link copied to
 	the clipboard.
@@ -650,7 +343,7 @@
       <div class="setting">
 	<div class="setting-name">Track shift/ctrl/alt via onkeyup/down</div>
 	<div class="setting-value">
-	  <input class="setting-input" type="checkbox" name="modifierKeyTracking" autocomplete="off">
+	  <input class="setting-input" type="checkbox" name="modifierKeyTracking">
 	</div>
 	<div class="setting-description">Try this option if you have 
 	problem using Shift left/middle click or Auto Hover Copy
@@ -687,12 +380,45 @@
 	<div class="setting-reset"><input type="button" value="Default"></div>
       </div>
 
+      <div class="setting">
+	<div class="setting-name">Debug level</div>
+	<div class="setting-value">
+	  <select class="setting-input" name="debugLevel">
+	    <option value="0">0. None</option>
+	    <option value="1">1. Error</option>
+	    <option value="2">2. Warning</option>
+	    <option value="3">3. Log</option>
+	    <option value="4">4. Info</option>
+	    <option value="5">5. Debug</option>
+	    <!-- option value="meta">Windows Key (Command on Mac)</option -->
+	  </select>
+	</div>
+	<div class="setting-description">
+	  This is for debugging the extension. Please leave it at <em>None</em>.
+	</div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+      <div class="setting indent hidden">
+	<div class="setting-name">Host name in console prefix</div>
+	<div class="setting-value">
+	  <input class="setting-input" type="checkbox" name="debugHostPrefix">
+	</div>
+	<div class="setting-description">
+	  If turned on then then console message will include the hostname
+	  of the page.  This option is related to <em>Debug level</em>
+	</div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+
     </div>
   </div>
 
 </div>
 
 
+<script src="console.js"></script>
 <script src="options.js"></script>
 </body>
 
