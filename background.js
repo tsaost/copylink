@@ -17,7 +17,7 @@ function ErrorHandler(text) {
     let promises = true; // Assume running on Firefox
 	// let isEdgeBrowser = false;
 	if (browser === chrome) {
-		// If browser is not defined, the plugin was loaded into Google Chrome.
+		// If browser === chrome, then the extension was loaded into Chrome.
 		// Set the browser variable and other differences accordingly.
 		promises = false;
 		// listenUrls = ['http://*/*', 'https://*/*'];

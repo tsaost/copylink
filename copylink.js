@@ -39,14 +39,13 @@ When you move away from the link, the caret position is restored.
 
 (function(browser) {
 	let promises = true; // Assume running on Firefox
-	// let isEdgeBrowser = false;
 
 	// chrome will be undefined if script was not loaded from an web extension.
 	const webext = (typeof chrome !== 'undefined');
 
 	if (webext) {
 		if (browser === chrome) {
-			// the plugin was loaded into Google Chrome.
+			// If browser === chrome, then the extension was loaded into Chrome.
 			// Set the browser variable and other differences accordingly.
 			promises = false;
 			// listenUrls = ['http://*/*', 'https://*/*'];
