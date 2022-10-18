@@ -88,7 +88,7 @@ function ErrorHandler(text) {
 		// for (key of Object.keys(items)) {
 		for (const key in items) {
 			// Remove any key that is no longer used
-			if (!(key in defaults)) { // && key !== 'sectionsExpansionState') {
+			if (!(key in defaults) && key !== 'sectionsExpansionState') {
 				printDebug("delete items[" + key + "]");
 				delete items[key];
 			}
