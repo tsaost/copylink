@@ -45,17 +45,19 @@ When you move away from the link, the caret position is restored.
 		if (browser === chrome) {
 			// If browser === chrome, then the extension was loaded into Chrome.
 			// Set the browser variable and other differences accordingly.
+			// console.warn("browser === chrome so promises = false");
 			promises = false;
 			// listenUrls = ['http://*/*', 'https://*/*'];
-		} else if (browser.runtime.getBrowserInfo) {
+		} else if (browser.runtime.getBrowserInfo === undefined) {
 			// If browser.runtime.getBrowserInfo is not defined, then we're on
 			// Microsoft Edge. However, we can't use the function at the moment
 			// as even in Firefox it doesn't return any data.
+			console.warn("no browser.runtime.getBrowserInfo so promises=false");
 			promises = false;
 			// isEdgeBrowser = true;
 		}
 	}
-	
+
 	const settings = {}; // options
 	let errorAlert, printWarn, printLog, printInfo, printDebug;
 
@@ -316,6 +318,7 @@ When you move away from the link, the caret position is restored.
 		// The downside is that there will be more calls to the mouseover
 		// handler whereas handler for mouseenter is only called when the
 		// mouse is over the element
+		// console.log("promises:" + promises);
 
 		function keyUpDownHandler(event) {
 			shiftKeyHold = event.shiftKey;
