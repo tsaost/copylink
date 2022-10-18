@@ -1,4 +1,5 @@
-
+// Some of code is from SSS (Swift Selection Search) settings.js/.html
+// by Daniel Lobo/CanisLupus  
 
 (function(browser) {
 	'use strict'
