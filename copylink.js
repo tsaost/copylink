@@ -137,6 +137,8 @@ When you move away from the link, the caret position is restored.
 			if (!copyLinkDiv) {
 				createCopyLinkDiv();
 			}
+			// copyLinkDiv.innerHTML = text.replaceAll('<', '&lt;').
+			//	replaceAll('>', '&gt;').replaceAll('\n', '<br/>');
 			copyLinkDiv.innerHTML = text.replaceAll('\n', '<br/>');
 			window.getSelection().removeAllRanges();
 			selectCopyLinkDivText(copyLinkDiv);
