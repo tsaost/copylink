@@ -535,13 +535,18 @@ When you move away from the link, the caret position is restored.
 			}
 
 			// Note: because of the asynchronous nature of background.js
+			// (it needs to call storage.local.get(), which is asynchronous)
 			// it is possible for the tab to send 'content-settings',
 			// get a reply, and later get a "push" of command 'settings'
 			// from background.js later when background.js finished loading
 			// itself, resulting in a duplicate call to updateSettings
 			// immediately after the first call.  This is necessary because
 			// there is no easy way for the tab to determine if it is loaded
-			// before or after background.js is loaded.
+			// before or after background.js is done loading.  This is actually
+			// correct because if content-settings was sent before background.js
+			// is done reading its setting from storage.local(), the value
+			// returned is just the default values, so the 2nd call to
+			// updateSettings with the actual values will then fix the problem.
 			browser.runtime.onMessage.
 				addListener((msg, sender, callbackFunc) => {
 					switch (msg.type) {
