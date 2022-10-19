@@ -66,7 +66,7 @@
 			// Fix any key that is missing
 			if (!(key in items)) {
 				items[key] = defaults[key];
-				console.warn("missing items[" + key + "]=" + items[key]);
+				console.debug("missing items[" + key + "]=" + items[key]);
 			}
 		}
 	
@@ -78,10 +78,11 @@
 		// is-it-safe-to-delete-an-object-property-while-iterating-over-them
 		// So I guess it's safe after all.
 		// for (key of Object.keys(items)) {
+		const warn = printWarn? printWarn : console.warn;
 		for (const key in items) {
 			// Remove any key that is no longer used
 			if (!(key in defaults) && key !== 'sectionsExpansionState') {
-				console.warn("delete items[" + key + "]");
+				warn("delete items[" + key + "]");
 				delete items[key];
 			}
 		}
@@ -160,6 +161,8 @@
 	
 	
 	function updateSettingsOnAllTabs() {
+		printInfo("updateSettingsOnAllTabs()");
+
 		const sendSettingsToTabs = tabs => {
 			for (const tab of tabs) {
 				printDebug("browser.tabs.sendMessage('settings') to " +
@@ -225,14 +228,9 @@
 		 */
 		browser.contextMenus.onClicked.addListener((info, tab) => {
 			switch (info.menuItemId) {
-				case 'options':
-				browser.runtime.openOptionsPage();
-				break;
-				case 'about':
-				browser.tabs.create({ url: 'about.html' });
-				case 'test':
-				browser.tabs.create({ url: 'test.html' });
-				break;
+				case 'options': browser.runtime.openOptionsPage(); break;
+				case 'about': browser.tabs.create({ url: 'about.html' }); break;
+				case 'test': browser.tabs.create({ url: 'test.html' }); break;
 				default:
 				errorAlert("Unknown info.menuItemId:" + info.menuItemId);
 				break;
