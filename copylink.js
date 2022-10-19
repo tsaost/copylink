@@ -36,26 +36,17 @@ When you move away from the link, the caret position is restored.
 (function(browser) {
 	'use strict'
 
-	let promises = true; // Assume running on Firefox
+	const promises = chrome.runtime.getURL('').startsWith('moz-extension://');
 
 	// chrome will be undefined if script was not loaded from an web extension.
 	const webext = (typeof chrome !== 'undefined');
 
 	if (webext) {
-		if (browser === chrome) {
-			// If browser === chrome, then the extension was loaded into Chrome.
+		if (browser === null) {
+			// If browser === null, then the extension was loaded into Chrome.
 			// Set the browser variable and other differences accordingly.
-			// console.warn("browser === chrome so promises = false");
-			promises = false;
-			// listenUrls = ['http://*/*', 'https://*/*'];
-		} else if (browser.runtime.getBrowserInfo === undefined) {
-			// If browser.runtime.getBrowserInfo is not defined, then we're on
-			// Microsoft Edge. However, we can't use the function at the moment
-			// as even in Firefox it doesn't return any data.
-			console.warn("no browser.runtime.getBrowserInfo so promises=false");
-			promises = false;
-			// isEdgeBrowser = true;
-		}
+			browser = chrome;
+		} 
 	}
 
 	const settings = {}; // options
@@ -500,11 +491,13 @@ When you move away from the link, the caret position is restored.
 			const prefix = items.debugHostPrefix?
 				(new URL(locationHref).host + " copylink c: ") : "copylink c: ";
 			[errorAlert, printWarn, printLog, printInfo, printDebug] =
-				getConsolePrintList(prefix, items.debugLevel);
+				getConsolePrints(prefix, items.debugLevel,
+								 items.debugDuplicate);
 			printLog("updateSettings(items)");
+			// console.trace();
 			for (const key in items) {
 				const value = items[key];
-				// getConsolePrintList() not called yet
+				// getConsolePrints() not called yet
 				// console.debug("update settings[" + key + "] to " + value);
 				settings[key] = value;
 //				if (key === 'autoHoverCopy') {
@@ -528,17 +521,27 @@ When you move away from the link, the caret position is restored.
 		if (webext) {
 			const contentSettingMessage = {type: 'content-settings'};
 			if (promises) {
+				// console.trace();
 				browser.runtime.sendMessage(contentSettingMessage).
 					then(reply =>
 						 updateSettings(reply.settingsForContentScript),
-						 ErrorHandler("Error background content-settings:"));
+						 ErrorHandler("Error background content-settings"));
 			} else {
+				// console.trace();
 				console.warn("No promise sendMessage(contentSettingMessage)");
 				browser.runtime.
 					sendMessage(contentSettingMessage, reply =>
 								updateSettings(reply.settingsForContentScript));
 			}
-	
+
+			// Note: because of the asynchronous nature of background.js
+			// it is possible for the tab to send 'content-settings',
+			// get a reply, and later get a "push" of command 'settings'
+			// from background.js later when background.js finished loading
+			// itself, resulting in a duplicate call to updateSettings
+			// immediately after the first call.  This is necessary because
+			// there is no easy way for the tab to determine if it is loaded
+			// before or after background.js is loaded.
 			browser.runtime.onMessage.
 				addListener((msg, sender, callbackFunc) => {
 					switch (msg.type) {
@@ -552,6 +555,7 @@ When you move away from the link, the caret position is restored.
 						break;
 					}
 				});
+
 		} else {
 			// Setup setting when testing via test.html
 			const items = {
@@ -576,7 +580,7 @@ When you move away from the link, the caret position is restored.
 		window.addEventListener('load', setup);
 	}
 
-})(typeof browser === 'undefined'? chrome : browser);
+})(typeof browser === 'undefined'? null : browser);
 // Must check using (typeof browser === 'undefined') rather than
 // use something like (browser || chrome)
 // otherwise chrome will throw an error and the extension will not load

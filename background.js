@@ -1,20 +1,13 @@
 (function(browser) {
 	'use strict'
 
-    let promises = true; // Assume running on Firefox
+	const promises = chrome.runtime.getURL('').startsWith('moz-extension://');
 
-	// let isEdgeBrowser = false;
-	if (browser === chrome) {
-		// If browser === chrome, then the extension was loaded into Chrome.
+	if (browser === null) {
+		// If browser === null, then the extension was loaded into Chrome.
 		// Set the browser variable and other differences accordingly.
-		promises = false;
+		browser = chrome;
 		// listenUrls = ['http://*/*', 'https://*/*'];
-	} else if (browser.runtime.getBrowserInfo === undefined) {
-		// If browser.runtime.getBrowserInfo is not defined, then we're on
-		// Microsoft Edge. However, we can't use the function at the moment
-		// as even in Firefox it doesn't return any data.
-		promises = false;
-		// isEdgeBrowser = true;
 	}
 	
 	const defaultSettings = {
@@ -33,6 +26,7 @@
 		modifierKeyTracking: false,
 		middleClickClose: 'never', // never always shift control alt
 		debugLevel: 3, // 0:none, 1:error 2:warn 3:log 4:info 5:debug
+		debugDuplicate: true,
 		debugHostPrefix: true,
 		sectionsExpansionState: {} // this is for options.js
 	}
@@ -54,7 +48,8 @@
 		middleClickClose: undefined,
 		modifierKeyTracking: undefined,
 		debugLevel: undefined,
-		debugHostPrefix: true
+		debugDuplicate: undefined,
+		debugHostPrefix: undefined
 	}
 		
 	
@@ -100,7 +95,8 @@
 			settingsForContentScript[key] = items[key];
 		}
 		[errorAlert, printWarn, printLog, printInfo, printDebug] =
-			getConsolePrintList("copylink b: ", settings.debugLevel);
+			getConsolePrints("copylink b: ", settings.debugLevel,
+							 settings.debugDuplicate);
 	}
 	
 	
@@ -113,7 +109,7 @@
 			return;
 		}
 		if (defaultSettings.debugLevel > 4) {
-			// getConsolePrintList() not called yet
+			// getConsolePrints() not called yet
 			console.debug("onSettingsChanged(changes," + area + ")");
 		}
 		if (promises) {
@@ -134,11 +130,14 @@
 	function onContentScriptMessage(msg, sender, sendResponse) {
 		const tab = sender.tab;
 		if (!tab) {
-			printWarn("from extension");
+			console.warn("from extension");
 			return;
 		}
-	
-		printInfo("onContentScriptMessage(" + msg.type + ")");
+
+		// When reloading script the tab may call sendMessage
+		// before getConsolePrints is called because loading
+		// settings from local storage is asynchronous.
+		console.info("onContentScriptMessage(" + msg.type + ")");
 		switch (msg.type) {
 		case 'content-settings':
 			sendResponse({settingsForContentScript});
@@ -169,7 +168,7 @@
 				const promise = browser.tabs.sendMessage(tab.id, message);
 				if (promise) {
 					promise.then(_ => {},
-								 ErrorHandler("Error sending setting"+ tab.id));
+								 ErrorHandler("Error sending setting "+tab.id));
 				}
 			}
 		};
@@ -244,7 +243,7 @@
 	console.clear();
 	onSettingsChanged(undefined, 'local');
 
-})(typeof browser === 'undefined'? chrome : browser);
+})(typeof browser === 'undefined'? null: browser);
 // Must check using (typeof browser === 'undefined') rather than
 // use something like (browser || chrome)
 // otherwise chrome will throw an error and the extension will not load
