@@ -4,27 +4,17 @@
 (function(browser) {
 	'use strict'
 
+	const promises = chrome.runtime.getURL('').startsWith('moz-extension://');
+	if (browser === null) {
+		browser = chrome;
+	}
+	
 	let defaultSettings;
 	let settings;
 	let errorAlert, printWarning, printLog, printInfo, printDebug;
 
 	const page = {};
 
-    let promises = true; // Assume running on Firefox
-	// let isEdgeBrowser = false;
-	if (browser === chrome) {
-		// If browser is not defined, the plugin was loaded into Google Chrome.
-		// Set the browser variable and other differences accordingly.
-		promises = false;
-		// listenUrls = ['http://*/*', 'https://*/*'];
-	} else if (browser.runtime.getBrowserInfo === undefined) {
-		// If browser.runtime.getBrowserInfo is not defined, then we're on
-		// Microsoft Edge. However, we can't use the function at the moment
-		// as even in Firefox it doesn't return any data.
-		promises = false;
-		// isEdgeBrowser = true;
-	}
-	
 	function updatePage() {
 		// console.trace();
         for (const item of page.inputs) {
@@ -75,10 +65,11 @@
 			setVisiblity(page.maxTooltip, value);
 			break;
 
-		case 'debugLevel':
-			printDebug("debugLevel: " + value);
-			setVisiblity(page.debugHostPrefix, value !== '0');
-			break;
+		case 'debugLevel': {
+			const visible = (value !== '0');
+			setVisiblity(page.debugHostPrefix, visible);
+			setVisiblity(page.debugDuplicate, visible);
+			} break;
 
 		case 'shiftLeftClick':
 		case 'shiftMiddleClick':
@@ -86,6 +77,7 @@
 		case 'autoHoverDelay':
 		case 'modifierKeyTracking':
 		case 'middleClickClose':
+		case 'debugDuplicate':
 		case 'debugHostPrefix':
 			printDebug("updateOptionsVisiblity: nothign to do.");
 			break;
@@ -101,6 +93,9 @@
 
     function initializePage() {
 		printLog("initializePage() debugLevel:" + settings.debugLevel);
+		document.getElementById('debugLevel').innerHTML =
+			getDebugLevelSelectHtml('setting-input');
+
         page.inputs = document.querySelectorAll("input, select, textarea");
         for (const item of page.inputs) {
 			const name = item.name;
@@ -243,7 +238,8 @@
 	function handleBackgroundResponse(response) {
 		settings = response.settings;
 		[errorAlert, printWarning, printLog, printInfo, printDebug] =
-			getConsolePrintList("copylink o: ", settings.debugLevel);
+			getConsolePrints("copylink o: ", settings.debugLevel,
+							 settings.debugDuplicate);
 		printDebug("defaultSettings:" + defaultSettings);
 		printDebug("settings:" + settings);
 		const domLoaded = (defaultSettings === '');
@@ -265,7 +261,7 @@
 	} else {
 		browser.runtime.sendMessage(message, handleBackgroundResponse);
 	}
-})(typeof browser === 'undefined'? chrome : browser);
+})(typeof browser === 'undefined'? null: browser);
 // Must check using (typeof browser === 'undefined') rather than
 // use something like (browser || chrome)
 // otherwise chrome will throw an error and the extension will not load
