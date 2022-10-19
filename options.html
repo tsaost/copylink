@@ -382,16 +382,7 @@
 
       <div class="setting">
 	<div class="setting-name">Debug level</div>
-	<div class="setting-value">
-	  <select class="setting-input" name="debugLevel">
-	    <option value="0">0. None</option>
-	    <option value="1">1. Error</option>
-	    <option value="2">2. Warning</option>
-	    <option value="3">3. Log</option>
-	    <option value="4">4. Info</option>
-	    <option value="5">5. Debug</option>
-	    <!-- option value="meta">Windows Key (Command on Mac)</option -->
-	  </select>
+	<div id="debugLevel" class="setting-value">
 	</div>
 	<div class="setting-description">
 	  This is for debugging the extension. Please leave it at <em>None</em>.
@@ -399,7 +390,20 @@
 	<div class="setting-reset"><input type="button" value="Default"></div>
       </div>
 
-      <div class="setting indent hidden">
+      <div class="setting">
+	<div class="setting-name">Duplicate debug console output</div>
+	<div class="setting-value">
+	  <input class="setting-input" type="checkbox" name="debugDuplicate">
+	</div>
+	<div class="setting-description">
+	  If turned on then then console message will be duplicated in
+	  the debug output of the Browser Console.
+	  This option is related to <em>Debug level</em>
+	</div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+      <div class="setting">
 	<div class="setting-name">Host name in console prefix</div>
 	<div class="setting-value">
 	  <input class="setting-input" type="checkbox" name="debugHostPrefix">
