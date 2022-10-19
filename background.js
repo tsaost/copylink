@@ -78,7 +78,7 @@
 		// is-it-safe-to-delete-an-object-property-while-iterating-over-them
 		// So I guess it's safe after all.
 		// for (key of Object.keys(items)) {
-		const warn = printWarn? printWarn : console.warn;
+		const warn = printWarn || console.warn;
 		for (const key in items) {
 			// Remove any key that is no longer used
 			if (!(key in defaults) && key !== 'sectionsExpansionState') {
