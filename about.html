@@ -7,17 +7,17 @@
 <head>
 <meta charset="utf-8">
 <style>
-  /* general formatting and layout */
 
-  * {
+  body {
+    font: message-box;
     font-size: 1rem;
     box-sizing: border-box;
     padding: 0;
     margin: 0;
   }
 
-  p, li {
-    font: message-box;
+  .setting-name {
+     font-size: 1rem;
   }
 
   body {
@@ -121,7 +121,7 @@
     margin-right: 20px;
   }
   .setting-description {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     width: 90%;
     padding-left: 20px;
     color: #000;
@@ -132,10 +132,10 @@
   }
 
   .setting-description * {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
   .setting-description a {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #666;
   }
   .setting-description em {
@@ -144,7 +144,7 @@
   }
   .setting-description details,
   .setting-description summary {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #666;
   }
   .setting-description summary:hover {
@@ -159,7 +159,7 @@
     visibility: visible;
   }
   .setting.disabled .setting-value {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
   .setting.disabled {
     color: #666;
@@ -272,22 +272,6 @@
     </div>
 
     <div class="setting">
-      <div class="setting-name">Problems?</div>
-      <div class="setting-description">
-      <p>Please go to <a href="https://github.com/tsaost/copylink/issues">
-      Github</a> to report any problems.</p>
-      <p>
-     	If you have some programming experince you can also tinker
-	with the code yourself. All the code can be found on 
-	<a href="https://github.com/tsaost/copylink">Github</a>.
-	You can also unzip the extension itself, which can be
-	found in the <code>extensions</code> subdirectory under
-	your Firefox profile directory.
-      </p>
-      </div>
-    </div>
-
-    <div class="setting">
       <div class="setting-name">Advanced usage</div>
       <div class="setting-description">
         <details>
@@ -301,6 +285,22 @@
     </div>
   </div>
 </div>
+
+<div>
+<p>
+Project source code: <a href="https://github.com/tsaost/spss">https://github.com/tsaost/spss</a>.
+</p>
+&nbsp;
+<p>  
+	You can report bugs and make suggestions on
+	<a href="https://github.com/tsaost/spss/issues">Github</a>.
+	But if you have some programming experince then just tinker
+	with the code yourself. All the code can be found on 
+	<a href="https://github.com/tsaost/spss">Github</a>.
+	You can also unzip the extension itself, which can be
+	found in the <code>extensions</code> subdirectory under
+	your Firefox profile directory.
+</p>
 
 <div class="attributions">
 <h1>Attributions</h1>
