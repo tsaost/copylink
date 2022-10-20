@@ -211,7 +211,7 @@
 		if (defaultSettings.debugLevel > 2) {
 			browser.contextMenus.create(
 			{id: 'test',
-					 title: "Test CCL",
+					 title: "CCL Demo",
 					 contexts: ['browser_action'] });
 
 		}
