@@ -57,8 +57,8 @@ function getConsolePrints(prefix, level, duplicate) {
 	ErrorHandler = function(text) {
 		return error => {
 			const errorText = prefix + text + ': ' + error;
-			if (errorText.indexOf("Could not establish connection. " +
-								  "Receiving end does not exist.") > 0) {
+			if (errorText.includes("Could not establish connection. " +
+								   "Receiving end does not exist.")) {
 				// Not really an error so just make a note of it.
 				if (level > 4) console.debug(errorText);
 			} else {
