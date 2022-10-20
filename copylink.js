@@ -54,7 +54,7 @@ When you move away from the link, the caret position is restored.
 			// actually a text selection (window.getSelection().toString()!=='')
 			// so we only need to save the caret (i.e., start of the selection)
 			globalCaretPosition = document.activeElement.selectionStart;
-			printLog("globalCaretPosition: " + globalCaretPosition);
+			printDebug("globalCaretPosition: " + globalCaretPosition);
 		}
 		// if (selection.rangeCount > 0) {
 		//    selection.removeAllRanges();
@@ -371,6 +371,7 @@ When you move away from the link, the caret position is restored.
 						if (!copyLinkDiv) {
 							createCopyLinkDiv();
 						}
+						printLog("copyLinkDiv.innerHTML = " + anchor.href);
 						copyLinkDiv.innerHTML = anchor.href;
 						selectCopyLinkDivText(copyLinkDiv);
 					}
