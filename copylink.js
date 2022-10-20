@@ -1,13 +1,3 @@
-'use strict'
-
-const locationHref = window.location.href;
-
-const TEST = locationHref.endsWith('/test.html') &&
-	(locationHref.startsWith('moz-extension://') ||
-	 locationHref.startsWith('chrome-extension://'));
-	
-
-
 /*
 Contains some code from
 		 
@@ -38,15 +28,10 @@ When you move away from the link, the caret position is restored.
 
 	const promises = chrome.runtime.getURL('').startsWith('moz-extension://');
 
-	// chrome will be undefined if script was not loaded from an web extension.
-	const webext = (typeof chrome !== 'undefined');
-
-	if (webext) {
-		if (browser === null) {
-			// If browser === null, then the extension was loaded into Chrome.
-			// Set the browser variable and other differences accordingly.
-			browser = chrome;
-		} 
+	if (browser === null) {
+		// If browser === null, then the extension was loaded into Chrome.
+		// Set the browser variable and other differences accordingly.
+		browser = chrome;
 	}
 
 	const settings = {}; // options
@@ -143,7 +128,7 @@ When you move away from the link, the caret position is restored.
 			window.getSelection().removeAllRanges();
 			selectCopyLinkDivText(copyLinkDiv);
 			document.execCommand('copy');
-		} else if (webext) {
+		} else {	
 			// execCommand('copy') is deprecated, so try to use
 			// clipboard.writeText if possible
 			const promise = navigator.clipboard.writeText(text);
@@ -491,7 +476,8 @@ When you move away from the link, the caret position is restored.
 
 		function updateSettings(items) {
 			const prefix = items.debugHostPrefix?
-				(new URL(locationHref).host + " copylink c: ") : "copylink c: ";
+				(new URL(window.location.href).host + " copylink c: ") :
+				"copylink c: ";
 			[errorAlert, printWarn, printLog, printInfo, printDebug] =
 				getConsolePrints(prefix, items.debugLevel,
 								 items.debugDuplicate);
@@ -520,73 +506,50 @@ When you move away from the link, the caret position is restored.
 			}
 		}
 
-		if (webext) {
-			const contentSettingMessage = {type: 'content-settings'};
-			if (promises) {
-				// console.trace();
-				browser.runtime.sendMessage(contentSettingMessage).
-					then(reply =>
-						 updateSettings(reply.settingsForContentScript),
-						 ErrorHandler("Error background content-settings"));
-			} else {
-				// console.trace();
-				console.warn("No promise sendMessage(contentSettingMessage)");
-				browser.runtime.
-					sendMessage(contentSettingMessage, reply =>
-								updateSettings(reply.settingsForContentScript));
-			}
-
-			// Note: because of the asynchronous nature of background.js
-			// (it needs to call storage.local.get(), which is asynchronous)
-			// it is possible for the tab to send 'content-settings',
-			// get a reply, and later get a "push" of command 'settings'
-			// from background.js later when background.js finished loading
-			// itself, resulting in a duplicate call to updateSettings
-			// immediately after the first call.  This is necessary because
-			// there is no easy way for the tab to determine if it is loaded
-			// before or after background.js is done loading.  This is actually
-			// correct because if content-settings was sent before background.js
-			// is done reading its setting from storage.local(), the value
-			// returned is just the default values, so the 2nd call to
-			// updateSettings with the actual values will then fix the problem.
-			browser.runtime.onMessage.
-				addListener((msg, sender, callbackFunc) => {
-					switch (msg.type) {
-						case 'copylink': copyLinksInSelectionToClipboar();
-						break;
-						case 'settings':
-						updateSettings(msg.settingsForContentScript);
-						break;
-						default:
-						errorAlert("Unknown msg.type:" + msg.type);
-						break;
-					}
-				});
-
+		const contentSettingMessage = {type: 'content-settings'};
+		if (promises) {
+			// console.trace();
+			browser.runtime.sendMessage(contentSettingMessage).
+				then(reply =>
+					 updateSettings(reply.settingsForContentScript),
+					 ErrorHandler("Error background content-settings"));
 		} else {
-			// Setup setting when testing via test.html
-			const items = {
-				autoHoverCopy: 'shift',
-				autoHoverDelay: 300,
-				clipboardCopyTooltip: true,
-				maxTooltip: 200,
-				shiftLeftClick: true,
-				shiftMiddleClick: true,
-				middleClickClose: 'never'
-			}
-			updateSettings(items);
+			// console.trace();
+			console.warn("No promise sendMessage(contentSettingMessage)");
+			browser.runtime.
+				sendMessage(contentSettingMessage, reply =>
+							updateSettings(reply.settingsForContentScript));
 		}
+
+		// Note: because of the asynchronous nature of background.js
+		// (it needs to call storage.local.get(), which is asynchronous)
+		// it is possible for the tab to send 'content-settings',
+		// get a reply, and later get a "push" of command 'settings'
+		// from background.js later when background.js finished loading
+		// itself, resulting in a duplicate call to updateSettings
+		// immediately after the first call.  This is necessary because
+		// there is no easy way for the tab to determine if it is loaded
+		// before or after background.js is done loading.  This is actually
+		// correct because if content-settings was sent before background.js
+		// is done reading its setting from storage.local(), the value
+		// returned is just the default values, so the 2nd call to
+		// updateSettings with the actual values will then fix the problem.
+		browser.runtime.onMessage.
+			addListener((msg, sender, callbackFunc) => {
+				switch (msg.type) {
+					case 'copylink': copyLinksInSelectionToClipboar();
+					break;
+					case 'settings':
+					updateSettings(msg.settingsForContentScript);
+					break;
+					default:
+					errorAlert("Unknown msg.type:" + msg.type);
+					break;
+				}
+			});
 	} // setup();
 
-	if (webext && !TEST) {
-		// Running from content_scripts
-		setup();
-	} else {
-		// For development/debugging
-		// Running from test.html
-		window.addEventListener('load', setup);
-	}
-
+	setup();
 })(typeof browser === 'undefined'? null : browser);
 // Must check using (typeof browser === 'undefined') rather than
 // use something like (browser || chrome)
