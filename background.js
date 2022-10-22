@@ -57,7 +57,7 @@
 		if (printLog) {
 			printLog("sanitizeSettings(" + Object.keys(items) + ")");
 		} else {			
-			console.log("sanitizeSettings(items)");
+			console.log("copylink b: sanitizeSettings(items)");
 		}
 		// Make  copy so that defaultSettings is not changed
 		// when doing: settings[key] = defaultValues[key]
@@ -66,7 +66,8 @@
 			// Fix any key that is missing
 			if (!(key in items)) {
 				items[key] = defaults[key];
-				console.debug("missing items[" + key + "]=" + items[key]);
+				console.debug("copylink b: missing items[" + key + "]=" +
+							  items[key]);
 			}
 		}
 	
@@ -106,12 +107,13 @@
 	
 	function onSettingsChanged(changes, area) {
 		if (area !== 'local') {
-			console.warn("Not local onSettingsChanged(" + area + ")");
+			console.warn("copylink b: Not local onSettingsChanged(" +
+						 area + ")");
 			return;
 		}
 		if (defaultSettings.debugLevel > 4) {
 			// getConsolePrints() not called yet
-			console.debug("onSettingsChanged(changes," + area + ")");
+			console.debug("copylink b: onSettingsChanged(changes,"+ area +")");
 		}
 		if (promises) {
 			browser.storage.local.get()
@@ -131,14 +133,14 @@
 	function onContentScriptMessage(msg, sender, sendResponse) {
 		const tab = sender.tab;
 		if (!tab) {
-			console.warn("from extension");
+			console.warn("copylink b: from extension");
 			return;
 		}
 
 		// When reloading script the tab may call sendMessage
 		// before getConsolePrints is called because loading
 		// settings from local storage is asynchronous.
-		console.info("onContentScriptMessage(" + msg.type + ")");
+		console.info("copylink b: onContentScriptMessage(" + msg.type + ")");
 		switch (msg.type) {
 		case 'content-settings':
 			sendResponse({settingsForContentScript});
