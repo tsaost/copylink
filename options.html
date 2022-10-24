@@ -130,8 +130,8 @@
     margin-right: 20px;
   }
   .setting-value {
-    width: 35%;
-    max-width: 250px;
+    width: 30rem;
+    max-width: 40rem;
     margin-top: 2px;
   }
   .setting-description {
@@ -263,21 +263,70 @@
 	<div class="setting-value">
 	  <input class="setting-input" type="checkbox" name="shiftMiddleClick">
 	</div>
-	<div class="setting-description">When middle clicking on a link while
-	holding the shift key the link will be copied to the clipboard.
-	Normally shift + middle click will open the link in a new foreground
-	tab. Disable this option if you want the normal/default behavoir.
-</div>
+	<div class="setting-description">
+	  When middle clicking on a link while
+	  holding the shift key the link will be copied to the clipboard.
+	  Normally shift + middle click will open the link in a new foreground
+	  tab. Disable this option if you want the normal/default behavoir.
+	</div>
 	<div class="setting-reset"><input type="button" value="Default"></div>
       </div>
 
       <div class="setting">
+	<div class="setting-name">Link format</div>
+	<div class="setting-value">
+	  <select class="setting-input" name="linkFormat">
+	    <option value="raw">http://raw.link.com</option>
+	    <option value="autolink">autolink &lt;http://autolink.com&gt;</option>
+	    <option value="inlined">[inlined](http://inlined.com)</option>
+	    <option value="bare">bare(http://bare.com)</option>
+	    <option value="mixed">[mixed](https://inlined) or
+		                  &lt;autolink&gt;</option>
+	    <!-- option value="meta">Windows Key (Command on Mac)</option -->
+	  </select>
+	</div>
+	<div class="setting-description">
+	  <p>A link can be copied into the clipboard in various format,
+	  most of which are accepted as valid 
+	  <a href="https://www.markdownguide.org/getting-started/">markdown</a>.
+	  links. 
+	     The best choices are probably either raw (i.e., just the link)
+	     or mixed (inlined if there is text describing the link or
+	     autolink otherwise).
+	  </p>
+        </div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+      <div class="setting">
+	<div class="setting-name">Tab Link format</div>
+	<div class="setting-value">
+	  <select class="setting-input" name="tabLinkFormat">
+	    <option value="raw">http://raw.link.com</option>
+	    <option value="autolink">autolink &lt;http://autolink.com&gt;</option>
+	    <option value="inlined">[inlined](http://inlined.com)</option>
+	    <option value="bare">bare(http://bare.com)</option>
+	    <option value="mixed">[mixed](https://inlined) or
+		                  &lt;autolink&gt;</option>
+	    <!-- option value="meta">Windows Key (Command on Mac)</option -->
+	  </select>
+	</div>
+	<div class="setting-description">
+	  Same as above, but the fomat is used when you choose
+	  <em>Copy Tab URL</em> from the toolbar icon context menu.
+        </div>
+	<div class="setting-reset"><input type="button" value="Default"></div>
+      </div>
+
+
+      <div class="setting">
 	<div class="setting-name">Clipboard copy tooltip</div>
 	<div class="setting-value">
-	  <input class="setting-input" type="checkbox" name="clipboardCopyTooltip">
+	  <input class="setting-input" type="checkbox"
+		 name="clipboardCopyTooltip">
 	</div>
-	<div class="setting-description">Show a tooltip of the link copied to
-	the clipboard.
+	<div class="setting-description">
+	  Show a tooltip of the link copied to the clipboard.
 	</div>
 	<div class="setting-reset"><input type="button" value="Default"></div>
       </div>
@@ -290,9 +339,9 @@
 	<div class="setting-description">Maximum number of characters
 	displayed in <em>Clipboard copy tooltip</em>
 	</div>
-	<div class="setting-reset"><input type="button" value="Default"></div>
+	<div class="setting-reset"><input type="button" value="Default">
+	</div>
       </div>
-
 
       <div class="setting">
 	<div class="setting-name">Auto hover copy</div>
@@ -307,30 +356,34 @@
 	  </select>
 	</div>
 	<div class="setting-description">
-	<p>Hover over a link, wait a bit
-	(long enough to see a tooltip showing the link is being copied) and the
-	URL of the link will be copied automatically to the clipboard.
-	You can set it so that <em>Auto hover copy</em> happens only
-	when you hold down the shift/control/alt key.
+	  <p>Hover over a link, wait a bit
+	     (long enough to see a tooltip showing the link is being copied) and
+	     the URL of the link will be copied automatically to the clipboard.
+	     You can set it so that <em>Auto hover copy</em> happens only
+	     when you hold down the shift/control/alt key.
+	  </p>
+	  <p>
+	  But note that shift/control/alt key detection does not work
+	  100% of the time, and is very broken if you have Firefox's
+	  <em>privacy.resistFingerprinting</em> set to true in
+	  <em>about:config</em>
 	</p>
-	<p>
-	But note that shift/control/alt key detection does not work
-	100% of the time, and is broken if you have Firefox's
-	<em>privacy.resistFingerprinting</em> set to true in
-	<em>about:config</em>
-	</p>
-</div>
+      </div>
 	<div class="setting-reset"><input type="button" value="Default"></div>
       </div>
+
 
       <div class="setting indent hidden">
 	<div class="setting-name">Auto Hover delay</div>
 	<div class="setting-value">
-	  <input class="setting-input" type="number" name="autoHoverDelay" min="0">
+	  <input class="setting-input" type="number"
+		 name="autoHoverDelay" min="0">
 	</div>
-	<div class="setting-description">Number of
-	milliseconds to delay auto hover copy.	If after the delay
-	the mouse has not moved, then the auto copy is carried out</div>
+	<div class="setting-description">
+	   Number of milliseconds to delay auto hover copy.
+	   If after the delay the mouse has not moved,
+	   then the auto copy is carried out
+	</div>
 	<div class="setting-reset"><input type="button" value="Default"></div>
       </div>
 
@@ -344,14 +397,14 @@
       <div class="setting">
 	<div class="setting-name">Track shift/ctrl/alt via onkeyup/down</div>
 	<div class="setting-value">
-	  <input class="setting-input" type="checkbox" name="modifierKeyTracking">
+	  <input class="setting-input" type="checkbox"
+		 name="modifierKeyTracking">
 	</div>
 	<div class="setting-description">Try this option if you have 
 	problem using Shift left/middle click or Auto Hover Copy
 	</div>
 	<div class="setting-reset"><input type="button" value="Default"></div>
       </div>
-
 
       <div class="setting">
 	<div class="setting-name">Middle click close</div>

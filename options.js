@@ -77,6 +77,8 @@
 		case 'autoHoverDelay':
 		case 'modifierKeyTracking':
 		case 'middleClickClose':
+		case 'linkFormat':
+		case 'tabLinkFormat':
 		case 'debugDuplicate':
 		case 'debugHostPrefix':
 			printDebug("updateOptionsVisiblity: nothign to do.");
@@ -253,7 +255,7 @@
 		} 
 	}
 
-	const message = { type: 'all-settings' };
+	const message = { command: 'all-settings' };
 	if (promises) {
 		browser.runtime.sendMessage(message).
 			then(handleBackgroundResponse, 
