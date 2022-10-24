@@ -27,7 +27,7 @@
 		middleClickClose: 'never', // never always shift control alt
 		linkFormat: 'raw',      // raw, autolink, inlined, bare, mixed
 		tabLinkFormat: 'mixed', // ditto
-		debugLevel: 3, // 0:none, 1:error 2:warn 3:log 4:info 5:debug
+		debugLevel: 0, // 0:none, 1:error 2:warn 3:log 4:info 5:debug
 		debugDuplicate: true,
 		debugHostPrefix: true,
 		sectionsExpansionState: {} // this is for options.js
