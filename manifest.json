@@ -1,11 +1,11 @@
 {
     "manifest_version": 2,
     "name": "Click Copy Link",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Hover over a link and copy using Ctrl-C/Cmd-C, or click on it with middle mouse button while holding the shift key.  You can also copy multiple links using shfit + left mouse click.",
 
     "browser_specific_settings": {
-      "gecko": { "id": "clickcopylink.t_s_a_o_s_t@g.m.a.i.l.com" }
+      "gecko": { "id": "clickcopylink.t_s_a_o_s_t@gmail.com" }
     },
 
     "background": {
@@ -15,6 +15,7 @@
 
     "content_scripts": [{
          "matches": ["<all_urls>"],
+	 "run_at": "document_idle",
          "js": ["console.js", "copylink.js"],
          "css": ["copylink.css"]
     }],
