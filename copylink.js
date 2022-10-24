@@ -77,7 +77,7 @@ When you move away from the link, the caret position is restored.
 			if (text) {
 				copyLinkDiv.innerHTML = '';
 				copyLinkDiv.blur();
-				// window.getSelection().removeAllRanges();
+				window.getSelection().removeAllRanges();
 			}
 			if (globalCaretPosition !== -1) {
 				// printDebug("Set caret: " + globalCaretPosition);
@@ -106,7 +106,7 @@ When you move away from the link, the caret position is restored.
 	});
 	
 	
-	function copyTextToClipboard(text, x, y) {
+	function copyTextToClipboard(text, tooltipText, x, y) {
 		printLog("copyTextToClipboard(" + x + ", " + y + "): " + text);
 
 		if (window.location.href.startsWith('http://')) {
@@ -145,16 +145,16 @@ When you move away from the link, the caret position is restored.
 		}
 
 		printDebug("show tooltip(" + x + ", " + y + ")");
-		if (settings.clipboardCopyTooltip && (x > 0 || y > 0)) {
+		if (tooltipText && settings.clipboardCopyTooltip &&
+			(x > 0 || y > 0)) {
 			if (!tooltipDiv) {
 				printLog("createTooltip()");
 				createTooltip();
 			}
-			let tooltipText = text;
-			const lastIndex = tooltipText.lastIndexOf('\n');
-			if (lastIndex > 0) {
-				tooltipText = tooltipText.substring(lastIndex + 1);
-			}
+//			const lastIndex = tooltipText.lastIndexOf('\n');
+//			if (lastIndex > 0) {
+//				tooltipText = tooltipText.substring(lastIndex + 1);
+//			}
 			const textLength = tooltipText.length;
 			if (textLength > settings.maxTooltip) {
 				tooltipText = tooltipText.
@@ -197,7 +197,35 @@ When you move away from the link, the caret position is restored.
 	// let metaKeyHold = false
 
 	let globalLinksText = '';
-	let lastClickLinkCopied = '';
+	let lastLinkCopied = '';
+
+	function markdown(anchor) {
+		return formatAsMarkdown(anchor.href, anchor.textContent ||
+								anchor.innerText, settings.linkFormat);
+	}
+
+	function formatAsMarkdown(link, text, linkFormat) {
+		link = link.trim();
+		text = text.trim();
+		switch (linkFormat) {
+		case 'mixed':
+			link = text? `[${text}](${link})` : ('<' + link + '>'); break;
+		case 'inlined':
+			link = `[${text}](${link})`; break;
+		case 'bare':
+			link = text + '(' + link + ')'; break;
+		case 'autolink':
+			link = `${text} <${link}>`;
+			break;
+		case 'raw':
+			break;
+		default:
+			errorAlert("Unknown linkFormat(" + linkFormat + ")");
+			break;
+		}
+		return link.trim();
+	}
+
 
 	function handleMouseClick(event) {
 		// printDebug("handleMiddleMouseClick(" + event.button + ")");
@@ -214,12 +242,13 @@ When you move away from the link, the caret position is restored.
 				// Alt	  Download link					link in new window
 				event.preventDefault();
 				event.stopPropagation();
-				if (lastClickLinkCopied !== anchor.href) {
-					lastClickLinkCopied = anchor.href;
-					globalLinksText += '\n' + anchor.href;
+				if (lastLinkCopied !== anchor.href) {
+					lastLinkCopied = anchor.href;
+					globalLinksText += '\n' + markdown(anchor);
 					// navigator.clipboard.writeText(globalLinksText);
 				}
-				copyTextToClipboard(globalLinksText, event.pageX, event.pageY);
+				copyTextToClipboard(globalLinksText, lastLinkCopied,
+									event.pageX, event.pageY);
 			}
 		} else {
 			handleMouseAuxClick(event);
@@ -240,10 +269,10 @@ When you move away from the link, the caret position is restored.
 					(shiftKeyHold || event.shiftKey)) {
 					event.preventDefault();
 					event.stopPropagation();
-					lastClickLinkCopied = anchor.href;
-					globalLinksText = anchor.href; // copy current link only
+					lastLinkCopied = anchor.href;
+					globalLinksText = markdown(anchor);
 					// navigator.clipboard.writeText(globalLinksText);
-					copyTextToClipboard(globalLinksText, 
+					copyTextToClipboard(globalLinksText, lastLinkCopied,
 										event.pageX, event.pageY);
 				}
 			} else {
@@ -253,7 +282,7 @@ When you move away from the link, the caret position is restored.
 					(close === 'control' && event.ctrlKey) ||
 					(close === 'alt' && event.altKey)) {
 					printWarn("runtime.sendMessage(close)");
-					browser.runtime.sendMessage({type: 'close'}, reply =>
+					browser.runtime.sendMessage({command: 'close'}, reply =>
 												console.info(reply.farewell));
 				}
 			}
@@ -283,6 +312,12 @@ When you move away from the link, the caret position is restored.
 		document.body.append(copyLinkDiv);
 	}
 
+
+	function copyPageUrlAsLink() {
+		copyTextToClipboard(formatAsMarkdown(window.location.href,
+											 document.title,
+											 settings.tabLinkFormat));
+	}
 
 	function setup() {
 		// https://www.codegrepper.com/code-examples/javascript/
@@ -372,7 +407,7 @@ When you move away from the link, the caret position is restored.
 							createCopyLinkDiv();
 						}
 						printLog("copyLinkDiv.innerHTML = " + anchor.href);
-						copyLinkDiv.innerHTML = anchor.href;
+						copyLinkDiv.innerHTML = markdown(anchor);
 						selectCopyLinkDivText(copyLinkDiv);
 					}
 				} else if (autoCopy === 'never') {
@@ -383,6 +418,7 @@ When you move away from the link, the caret position is restored.
 						   " ctrl: " + ctrlKeyHold +
 						   " alt: " + altKeyHold);
 				if (!(globalLeftMouseDown || autoHoveCopyTimeout) &&
+					lastLinkCopied !== anchor.href &&
 					(autoCopy === 'always' ||
 					 (autoCopy === 'shift' &&
 					  (shiftKeyHold || event.shiftKey)) ||
@@ -393,9 +429,10 @@ When you move away from the link, the caret position is restored.
 					savedPageX = event.pageX;
 					savedPageY = event.pageY;
 					printInfo("setTimeout(" + anchor.href + ")");
+					lastLinkCopied = anchor.href;
 					autoHoveCopyTimeout =  setTimeout(_ => {
 						autoHoveCopyTimeout = null;
-						copyTextToClipboard(anchor.href,
+						copyTextToClipboard(markdown(anchor), lastLinkCopied,
 											savedPageX, savedPageY);
 					}, settings.autoHoverDelay);
 				} 
@@ -462,7 +499,7 @@ When you move away from the link, the caret position is restored.
 						// even if it's not fully selected
 						if (selection.containsNode(x, true)) {
 							// printDebug(j + ": " + x.href);
-							links.push(x.href);
+							links.push(markdown(x));
 						}
 					}
 				}
@@ -507,7 +544,7 @@ When you move away from the link, the caret position is restored.
 			}
 		}
 
-		const contentSettingMessage = {type: 'content-settings'};
+		const contentSettingMessage = {command: 'content-settings'};
 		if (promises) {
 			// console.trace();
 			browser.runtime.sendMessage(contentSettingMessage).
@@ -537,14 +574,15 @@ When you move away from the link, the caret position is restored.
 		// updateSettings with the actual values will then fix the problem.
 		browser.runtime.onMessage.
 			addListener((msg, sender, callbackFunc) => {
-				switch (msg.type) {
-					case 'copylink': copyLinksInSelectionToClipboar();
-					break;
-					case 'settings':
+				const command = msg.command;
+				switch (command) {
+				case 'copylink': copyLinksInSelectionToClipboar(); break;
+				case 'url': copyPageUrlAsLink(); break;
+				case 'settings':
 					updateSettings(msg.settingsForContentScript);
 					break;
-					default:
-					errorAlert("Unknown msg.type:" + msg.type);
+				default:
+					errorAlert("Unknown msg.type:" + command);
 					break;
 				}
 			});
