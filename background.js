@@ -25,6 +25,8 @@
 		shiftMiddleClick: true,
 		modifierKeyTracking: false,
 		middleClickClose: 'never', // never always shift control alt
+		linkFormat: 'raw',      // raw, autolink, inlined, bare, mixed
+		tabLinkFormat: 'mixed', // ditto
 		debugLevel: 3, // 0:none, 1:error 2:warn 3:log 4:info 5:debug
 		debugDuplicate: true,
 		debugHostPrefix: true,
@@ -45,8 +47,10 @@
 		maxTooltip: undefined,
 		shiftLeftClick: undefined,
 		shiftMiddleClick: undefined,
-		middleClickClose: undefined,
 		modifierKeyTracking: undefined,
+		middleClickClose: undefined,
+		linkFormat: undefined,
+		tabLinkFormat: undefined,
 		debugLevel: undefined,
 		debugDuplicate: undefined,
 		debugHostPrefix: undefined
@@ -140,8 +144,9 @@
 		// When reloading script the tab may call sendMessage
 		// before getConsolePrints is called because loading
 		// settings from local storage is asynchronous.
-		console.info("copylink b: onContentScriptMessage(" + msg.type + ")");
-		switch (msg.type) {
+		const command = msg.command;
+		console.info("copylink b: onContentScriptMessage(" + command + ")");
+		switch (command) {
 		case 'content-settings':
 			sendResponse({settingsForContentScript});
 			break;
@@ -156,7 +161,7 @@
 			break;
 
 		default:
-			errorAlert("Unknown msg.type(" + msg.type + ")");
+			errorAlert("Unknown command(" + command + ")");
 			break;
 		}
 	}
@@ -169,7 +174,8 @@
 			for (const tab of tabs) {
 				printDebug("browser.tabs.sendMessage('settings') to " +
 						   tab.id);
-				const message = { type: 'settings', settingsForContentScript};
+				const message = { command: 'settings',
+								  settingsForContentScript};
 				const promise = browser.tabs.sendMessage(tab.id, message);
 				if (promise) {
 					promise.then(_ => {},
@@ -195,7 +201,7 @@
 		// https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/
 		// WebExtensions/API/tabs/sendMessage
 		printLog("browserAction.onClicked => " + tab.id + " search");
-		browser.tabs.sendMessage(tab.id, { type: 'copylink', clickData });
+		browser.tabs.sendMessage(tab.id, { command: 'copylink', clickData });
 	});
 	
 	
@@ -203,28 +209,28 @@
 		// Create the browser action menu item to open the options page.
 		if (browser !== chrome) {
 			// Chrome base browser already have an "Options" menu item.
-			browser.contextMenus.create(
-			{id: 'options',
-					 title: "CCL Options",
-					 contexts: ['browser_action'] });
+			browser.contextMenus.create({
+			    id: 'options',
+				title: "CCL Options",
+				contexts: ['browser_action'] });
 		}
 
-
-		if (defaultSettings.debugLevel > 2) {
-			browser.contextMenus.create(
-			{id: 'test',
-					 title: "CCL Demo",
-					 contexts: ['browser_action'] });
-
-		}
+		// if (defaultSettings.debugLevel > 2) {
+		browser.contextMenus.create({
+            id: 'test',
+			title: "CCL Demo",
+			contexts: ['browser_action'] });
 	
+		browser.contextMenus.create({
+  		    id: 'url',
+		    title: 'Copy Tab URL',
+		    contexts: ['browser_action'] });
 
 		// Create the browser action menu item to open the about page.
-		browser.contextMenus.create(
-		{ id: 'about',
-				  title: 'About Click Copy Link',
-				  contexts: ['browser_action'] });
-	
+		browser.contextMenus.create({
+            id: 'about',
+			title: 'About Click Copy Link',
+			contexts: ['browser_action'] });
 		/*
 		 * Open the options page when the menu item was clicked.
 		 */
@@ -233,6 +239,8 @@
 				case 'options': browser.runtime.openOptionsPage(); break;
 				case 'about': browser.tabs.create({ url: 'about.html' }); break;
 				case 'test': browser.tabs.create({ url: 'test.html' }); break;
+				case 'url': browser.tabs.
+				sendMessage(tab.id, {command: 'url'}); break;
 				default:
 				errorAlert("Unknown info.menuItemId:" + info.menuItemId);
 				break;
@@ -242,7 +250,6 @@
 
 	console.clear();
 	onSettingsChanged(undefined, 'local');
-
 })(typeof browser === 'undefined'? null: browser);
 // Must check using (typeof browser === 'undefined') rather than
 // use something like (browser || chrome)
