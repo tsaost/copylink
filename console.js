@@ -17,11 +17,17 @@ const consoleClearErrorAlert = function(text) {
 }
 
 
-function getDebugLevelSelectHtml(selectClass) {
+function getDebugLevelSelectHtml(selectClass, selectId, selectName) {
+	if (!selectId) {
+		selectId = 'debug-level-select';
+	}
+	if (!selectName) {
+		selectName = 'debugLevel';
+	}
 	return 	(selectClass?
-			 ('<select id="debug-level-select" class="' +
-			  selectClass + '" name="debugLevel">') :
-			 '<select id="debug-level-select" name="debugLevel">') +
+			 ('<select id="' + selectId  + '" class="' +
+			  selectClass + '" name="' + selectName + '">') :
+			 '<select id="' + selectId + '" name="' + selectName + '">') +
 	    '<option value="0">0 (None)</option>' +
 	    '<option value="1">1 (Error)</option>' +
 	    '<option value="2">2 (Warning)</option>' +
