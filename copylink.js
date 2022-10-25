@@ -553,7 +553,7 @@ When you move away from the link, the caret position is restored.
 					 ErrorHandler("Error background content-settings"));
 		} else {
 			// console.trace();
-			console.warn("No promise sendMessage(contentSettingMessage)");
+			// console.warn("No promise sendMessage(contentSettingMessage)");
 			browser.runtime.
 				sendMessage(contentSettingMessage, reply =>
 							updateSettings(reply.settingsForContentScript));
