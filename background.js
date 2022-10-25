@@ -206,8 +206,22 @@
 	
 	
 	if (browser.contextMenus) {
+		// if (defaultSettings.debugLevel > 2) {
+		browser.contextMenus.create({
+  		    id: 'url',
+		    title: 'Copy Tab Website URL',
+		    contexts: ['browser_action'] });
+
+		browser.contextMenus.create({
+            id: 'test',
+			title: "CCL Demo",
+			contexts: ['browser_action'] });
+	
+		browser.contextMenus.create({type: "separator",
+									 contexts: ['browser_action'] });
+
 		// Create the browser action menu item to open the options page.
-		if (browser !== chrome) {
+		if (promises) {
 			// Chrome base browser already have an "Options" menu item.
 			browser.contextMenus.create({
 			    id: 'options',
@@ -215,22 +229,13 @@
 				contexts: ['browser_action'] });
 		}
 
-		// if (defaultSettings.debugLevel > 2) {
-		browser.contextMenus.create({
-            id: 'test',
-			title: "CCL Demo",
-			contexts: ['browser_action'] });
-	
-		browser.contextMenus.create({
-  		    id: 'url',
-		    title: 'Copy Tab URL',
-		    contexts: ['browser_action'] });
-
 		// Create the browser action menu item to open the about page.
 		browser.contextMenus.create({
             id: 'about',
 			title: 'About Click Copy Link',
 			contexts: ['browser_action'] });
+
+
 		/*
 		 * Open the options page when the menu item was clicked.
 		 */
