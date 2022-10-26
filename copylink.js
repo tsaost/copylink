@@ -320,18 +320,35 @@ When you move away from the link, the caret position is restored.
 	}
 
 	function setup() {
-		// https://www.codegrepper.com/code-examples/javascript/
-		//       add+event+listener+to+all+anchor+tag
-		// Must use mouseover rather than mouseenter because unlike mouseover,
-		// mouseenter does not "bubble up" and is not sent to any descendent
-		//
-		// Adding just one event listener to the body is faster than adding
-		// event listeners to every <a/>, if there are lots of <a/> in the page.
-		//
-		// The downside is that there will be more calls to the mouseover
-		// handler whereas handler for mouseenter is only called when the
-		// mouse is over the element
-		// console.log("promises:" + promises);
+
+		// Note: because of the asynchronous nature of background.js
+		// (it needs to call storage.local.get(), which is asynchronous)
+		// it is possible for the tab to send 'content-settings',
+		// get a reply, and later get a "push" of command 'settings'
+		// from background.js later when background.js finished loading
+		// itself, resulting in a duplicate call to updateSettings
+		// immediately after the first call.  This is necessary because
+		// there is no easy way for the tab to determine if it is loaded
+		// before or after background.js is done loading.  This is actually
+		// correct because if content-settings was sent before background.js
+		// is done reading its setting from storage.local(), the value
+		// returned is just the default values, so the 2nd call to
+		// updateSettings with the actual values will then fix the problem.
+		browser.runtime.onMessage.
+			addListener((msg, sender, callbackFunc) => {
+				const command = msg.command;
+				switch (command) {
+				case 'copylink': copyLinksInSelectionToClipboar(); break;
+				case 'url': copyPageUrlAsLink(); break;
+				case 'settings':
+					updateSettings(msg.settingsForContentScript);
+					break;
+				default:
+					errorAlert("Unknown msg.type:" + command);
+					break;
+				}
+			});
+
 
 		function keyUpDownHandler(event) {
 			shiftKeyHold = event.shiftKey;
@@ -366,6 +383,19 @@ When you move away from the link, the caret position is restored.
 		let savedPageX = 0;
 		let savedPageY = 0;
 
+
+		// https://www.codegrepper.com/code-examples/javascript/
+		//       add+event+listener+to+all+anchor+tag
+		// Must use mouseover rather than mouseenter because unlike mouseover,
+		// mouseenter does not "bubble up" and is not sent to any descendent
+		//
+		// Adding just one event listener to the body is faster than adding
+		// event listeners to every <a/>, if there are lots of <a/> in the page.
+		//
+		// The downside is that there will be more calls to the mouseover
+		// handler whereas handler for mouseenter is only called when the
+		// mouse is over the element
+		// console.log("promises:" + promises);
 		// printDebug("document.body.addEventListener('mouseover')");
 		document.body.addEventListener('mouseover', event => {
 //			if (event.shiftKey || event.ctrlKey || event.altKey) {
@@ -559,33 +589,6 @@ When you move away from the link, the caret position is restored.
 							updateSettings(reply.settingsForContentScript));
 		}
 
-		// Note: because of the asynchronous nature of background.js
-		// (it needs to call storage.local.get(), which is asynchronous)
-		// it is possible for the tab to send 'content-settings',
-		// get a reply, and later get a "push" of command 'settings'
-		// from background.js later when background.js finished loading
-		// itself, resulting in a duplicate call to updateSettings
-		// immediately after the first call.  This is necessary because
-		// there is no easy way for the tab to determine if it is loaded
-		// before or after background.js is done loading.  This is actually
-		// correct because if content-settings was sent before background.js
-		// is done reading its setting from storage.local(), the value
-		// returned is just the default values, so the 2nd call to
-		// updateSettings with the actual values will then fix the problem.
-		browser.runtime.onMessage.
-			addListener((msg, sender, callbackFunc) => {
-				const command = msg.command;
-				switch (command) {
-				case 'copylink': copyLinksInSelectionToClipboar(); break;
-				case 'url': copyPageUrlAsLink(); break;
-				case 'settings':
-					updateSettings(msg.settingsForContentScript);
-					break;
-				default:
-					errorAlert("Unknown msg.type:" + command);
-					break;
-				}
-			});
 	} // setup();
 
 	setup();
