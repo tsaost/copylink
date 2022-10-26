@@ -106,9 +106,26 @@ When you move away from the link, the caret position is restored.
 	});
 	
 	
+	let replaceAll;
+	if (typeof String.prototype.replaceAll === 'undefined') {
+		// https://stackoverflow.com/questions/62825358/
+		// javascript-replaceall-is-not-a-function-type-error
+		// $& means the whole matched string
+		function escapeRegExp(string) {
+			return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		}
+		replaceAll = function (str, match, replacement) {
+			return str.replace(new RegExp(escapeRegExp(match), 'g'),
+							   () => replacement);
+		}
+	} else {
+		replaceAll = function(str, match, replacement) {
+			return str.replaceAll(match, replacement);
+		}
+	}
+
 	function copyTextToClipboard(text, tooltipText, x, y) {
 		printLog("copyTextToClipboard(" + x + ", " + y + "): " + text);
-
 		if (window.location.href.startsWith('http://')) {
 			// https://developer.mozilla.org/en-US/docs/Mozilla/
 			// Add-ons/WebExtensions/Interact_with_the_clipboard
@@ -122,9 +139,10 @@ When you move away from the link, the caret position is restored.
 			if (!copyLinkDiv) {
 				createCopyLinkDiv();
 			}
-			// copyLinkDiv.innerHTML = text.replaceAll('<', '&lt;').
-			//	replaceAll('>', '&gt;').replaceAll('\n', '<br/>');
-			copyLinkDiv.innerHTML = text.replaceAll('\n', '<br/>');
+			text = replaceAll(text, '<', '&lt;');
+			text = replaceAll(text, '>', '&gt;');
+			text = replaceAll(text, '\n', '<br/>');
+			copyLinkDiv.innerHTML = text;
 			window.getSelection().removeAllRanges();
 			selectCopyLinkDivText(copyLinkDiv);
 			document.execCommand('copy');
