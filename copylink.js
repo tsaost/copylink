@@ -35,7 +35,9 @@ When you move away from the link, the caret position is restored.
 	}
 
 	const settings = {}; // options
-	let errorAlert, printWarn, printLog, printInfo, printDebug;
+	// These will be changed later by updateSettings(items)
+	let [errorAlert, printWarn, printLog, printInfo, printDebug] =
+		getConsolePrints("copylink c: ", 3, true);
 
 	let globalCaretPosition = -1;
 	let copyLinkDiv;
@@ -235,7 +237,7 @@ When you move away from the link, the caret position is restored.
 		case 'autolink':
 			link = `${text} <${link}>`;
 			break;
-		case 'raw':
+		case 'raw': case undefined:
 			break;
 		default:
 			errorAlert("Unknown linkFormat(" + linkFormat + ")");
@@ -301,7 +303,7 @@ When you move away from the link, the caret position is restored.
 					(close === 'alt' && event.altKey)) {
 					printWarn("runtime.sendMessage(close)");
 					browser.runtime.sendMessage({command: 'close'}, reply =>
-												console.info(reply.farewell));
+												printInfo(reply.farewell));
 				}
 			}
 		}
@@ -413,7 +415,7 @@ When you move away from the link, the caret position is restored.
 		// The downside is that there will be more calls to the mouseover
 		// handler whereas handler for mouseenter is only called when the
 		// mouse is over the element
-		// console.log("promises:" + promises);
+		// printLog("promises:" + promises);
 		// printDebug("document.body.addEventListener('mouseover')");
 		document.body.addEventListener('mouseover', event => {
 //			if (event.shiftKey || event.ctrlKey || event.altKey) {
