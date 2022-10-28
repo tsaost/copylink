@@ -34,7 +34,8 @@
 	}
 	
 	let settings;
-	let errorAlert, printWarn, printLog, printInfo, printDebug;
+	let [errorAlert, printWarn, printLog, printInfo, printDebug] =
+		getConsolePrints("copylink c: ", 3, true);
 
 	// At this point, settingsForContentScript has all the same attributes
 	// as setting.  In the future maybe settingsForContentScript will be
@@ -58,11 +59,7 @@
 		
 	
 	function sanitizeSettings(items) {
-		if (printLog) {
-			printLog("sanitizeSettings(" + Object.keys(items) + ")");
-		} else {			
-			console.log("copylink b: sanitizeSettings(items)");
-		}
+		printLog("sanitizeSettings(" + Object.keys(items) + ")");
 		// Make  copy so that defaultSettings is not changed
 		// when doing: settings[key] = defaultValues[key]
 		const defaults = Object.assign({}, defaultSettings);
@@ -70,8 +67,8 @@
 			// Fix any key that is missing
 			if (!(key in items)) {
 				items[key] = defaults[key];
-				console.debug("copylink b: missing items[" + key + "]=" +
-							  items[key]);
+				printDebug("copylink b: missing items[" + key + "]=" +
+						   items[key]);
 			}
 		}
 	
@@ -83,11 +80,10 @@
 		// is-it-safe-to-delete-an-object-property-while-iterating-over-them
 		// So I guess it's safe after all.
 		// for (key of Object.keys(items)) {
-		const warn = printWarn || console.warn;
 		for (const key in items) {
 			// Remove any key that is no longer used
 			if (!(key in defaults) && key !== 'sectionsExpansionState') {
-				warn("delete items[" + key + "]");
+				printWarn("delete items[" + key + "]");
 				delete items[key];
 			}
 		}
@@ -111,13 +107,13 @@
 	
 	function onSettingsChanged(changes, area) {
 		if (area !== 'local') {
-			console.warn("copylink b: Not local onSettingsChanged(" +
-						 area + ")");
+			printWarn("copylink b: Not local onSettingsChanged(" +
+					  area + ")");
 			return;
 		}
 		if (defaultSettings.debugLevel > 4) {
 			// getConsolePrints() not called yet
-			console.debug("copylink b: onSettingsChanged(changes,"+ area +")");
+			printDebug("copylink b: onSettingsChanged(changes,"+ area +")");
 		}
 		if (promises) {
 			browser.storage.local.get()
@@ -137,7 +133,7 @@
 	function onContentScriptMessage(msg, sender, sendResponse) {
 		const tab = sender.tab;
 		if (!tab) {
-			console.warn("copylink b: from extension");
+			printLog("copylink b: from extension");
 			return;
 		}
 
@@ -145,7 +141,7 @@
 		// before getConsolePrints is called because loading
 		// settings from local storage is asynchronous.
 		const command = msg.command;
-		console.info("copylink b: onContentScriptMessage(" + command + ")");
+		printInfo("copylink b: onContentScriptMessage(" + command + ")");
 		switch (command) {
 		case 'content-settings':
 			sendResponse({settingsForContentScript});
