@@ -364,7 +364,7 @@ When you move away from the link, the caret position is restored.
 					updateSettings(msg.settingsForContentScript);
 					break;
 				default:
-					errorAlert("Unknown msg.type:" + command);
+					errorAlert("Unknown msg.command:" + command);
 					break;
 				}
 			});
