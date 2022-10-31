@@ -147,10 +147,24 @@
 			sendResponse({settingsForContentScript});
 			break;
 	
+		case 'all-settings':
+			// This is for options.js
+			sendResponse({defaultSettings, settings});
+			break;
+	
 		case 'close':
 			sendResponse({farewell: "goodbye: " + tab.title});
 			chrome.tabs.remove(tab.id, _ => {});
 			break;
+
+//      Cannot do this:
+//          Error: permissions.request may only be called from a
+//				   user input handler background-copylink.js:162:5
+//		case 'permission-clipboardRead':
+//			browser.permissions.
+//				request({ permissions: ["clipboardRead"] }).
+//				then(granted => sendResponse({granted}));
+//			break;
 
 		default:
 			errorAlert("Unknown command(" + command + ")");
