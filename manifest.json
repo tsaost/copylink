@@ -37,7 +37,8 @@
         "default_title": "Click Copy Link"
     },
 
-    "permissions": [ "tabs", "storage", "contextMenus", "clipboardWrite"],
+    "permissions": [ "tabs", "storage", "contextMenus",
+		     "clipboardRead", "clipboardWrite"], 
 
     "options_ui": {
 	"page": "options.html",
