@@ -9,7 +9,7 @@
     },
 
     "background": {
-       "scripts": ["console.js", "background.js"],
+       "scripts": ["console.js", "background-copylink.js"],
        "persistent": false
     },
 
