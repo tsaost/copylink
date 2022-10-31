@@ -147,10 +147,6 @@
 			sendResponse({settingsForContentScript});
 			break;
 	
-		case 'all-settings':
-			sendResponse({defaultSettings, settings});
-			break;
-	
 		case 'close':
 			sendResponse({farewell: "goodbye: " + tab.title});
 			chrome.tabs.remove(tab.id, _ => {});
