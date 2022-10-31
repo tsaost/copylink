@@ -264,11 +264,35 @@ When you move away from the link, the caret position is restored.
 				event.stopPropagation();
 				if (lastLinkCopied !== anchor.href) {
 					lastLinkCopied = anchor.href;
-					globalLinksText += '\n' + markdown(anchor);
-					// navigator.clipboard.writeText(globalLinksText);
+					// But adding to globalLinksText would NOT work
+					// across pages, so to do it properly need to
+					// actually read whatever is in the clipboard
+					// and then add to it.
+					if (promises) {
+						// Cannot do this 
+						// Error: permissions.request may only be called from a
+						//		  user input handler background-copylink.js
+						// printDebug("permissions.request(clipboardRead)");
+						// browser.runtime.
+						//	sendMessage({command: 'permission-clipboardRead'},
+						// reply => {
+						//  if (reply.granted) {
+						printLog("navigator.clipboard.readText()");
+						navigator.clipboard.readText().
+							then((text) => {
+								printDebug("text:" + text);
+								globalLinksText = text + '\n'+ markdown(anchor);
+								copyTextToClipboard(globalLinksText,
+													lastLinkCopied,
+													event.pageX, event.pageY);
+							}, ErrorHandler("clipboard.readText()"));
+					} else {
+						globalLinksText += '\n'+ markdown(anchor);
+						copyTextToClipboard(globalLinksText,
+											lastLinkCopied,
+											event.pageX, event.pageY);
+					}
 				}
-				copyTextToClipboard(globalLinksText, lastLinkCopied,
-									event.pageX, event.pageY);
 			}
 		} else {
 			handleMouseAuxClick(event);
