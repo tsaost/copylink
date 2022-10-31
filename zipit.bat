@@ -1,2 +1,2 @@
 del ..\clickcopylink.zip
-zip ..\clickcopylink.zip manifest.json about.html test.html options.html background.js options.js copylink.js test.js console.js copylink.css icons/link48.png icons/link96.png icons/link128.png icons/link225.png
+zip ..\clickcopylink.zip manifest.json about.html test.html options.html background-copylink.js options.js content-script-copylink.js test.js console.js copylink.css icons/link48.png icons/link96.png icons/link128.png icons/link225.png
