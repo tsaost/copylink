@@ -95,7 +95,7 @@
 
     function initializePage() {
 		printLog("initializePage() debugLevel:" + settings.debugLevel);
-		document.getElementById('debugLevel').innerHTML =
+		document.getElementById('debugLevelContainer').innerHTML =
 			getDebugLevelSelectHtml('setting-input');
 
         page.inputs = document.querySelectorAll("input, select, textarea");
