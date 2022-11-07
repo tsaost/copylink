@@ -19,7 +19,7 @@ const consoleClearErrorAlert = function(text) {
 
 function getDebugLevelSelectHtml(selectClass, selectId, selectName) {
 	if (!selectId) {
-		selectId = 'debug-level-select';
+		selectId = 'debugLevel';
 	}
 	if (!selectName) {
 		selectName = 'debugLevel';
