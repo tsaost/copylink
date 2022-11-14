@@ -1,3 +1,6 @@
+/* eslint-env webextensions */
+/* globals getConsolePrints setupSelectionChange ErrorHandler */
+
 /*
 Contains some code from
 		 
